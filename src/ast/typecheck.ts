@@ -7,6 +7,12 @@ export function EQ(a: any, b: any) {
 }
 
 // Function to unify two ASTs
+export function UNIFYL(a: Ast, b: Ast, constants: Map<ConstId, Ast | 'free'>) : boolean {
+  console.log(a.fmt(),b.fmt(), b.value instanceof ConstId, constants.get(b.value), constants)
+  const r = UNIFY(a, b, constants);
+  console.log(r);
+  return  r;
+}
 export function UNIFY(a: Ast, b: Ast, constants: Map<ConstId, Ast | 'free'>) : boolean {
   if(a.value instanceof ConstId && constants.get(a.value)) {
     if(constants.get(a.value) === 'free') {
@@ -41,10 +47,10 @@ export function REPLACE(a: Ast, constants: Map<ConstId, Ast | 'free'>): Ast {
 // Type checker function used by Op
 export type TypeChecker = (opname: string, args: Ast[]) => SortAst;
 
-export function freeconstants_map(freeconstants: ConstId[] = []) : Map<ConstId, Ast | 'free'> {
+export function freeconstants_map(freeconstants: Ast[] = []) : Map<ConstId, Ast | 'free'> {
   const constants = new Map<ConstId, Ast | 'free'>();
   for (const free of freeconstants) {
-    constants.set(free, 'free');
+    constants.set(free.value, 'free');
   }
   return constants
 }
@@ -58,7 +64,7 @@ export function basicOp(
     if(args.length != argtypes.length) {
       throw new Error(`wrong number of arguments for ${opname}`);
     }
-    var constants = freeconstants_map(freeconstants.map(f => f.value as ConstId));
+    var constants = freeconstants_map(freeconstants);
     for(let i = 0; i < args.length; i++) {
       if(!UNIFY(args[i].typecheck(), argtypes[i], constants)) {
           throw new Error("wrong type of argument " + i + ` for ${opname} : ${args[i].typecheck().fmt()}`);
@@ -74,7 +80,7 @@ export function varargOp(
     freeconstants: Ast[] = [],
 ) : TypeChecker {
   return (opname: string, args: Ast[]) => {
-    var constants = freeconstants_map(freeconstants.map(f => f.value as ConstId));
+    var constants = freeconstants_map(freeconstants);
     for(let i = 0; i < args.length; i++) {
       if(!UNIFY(args[i].typecheck(), argtype, constants)) {
         throw new Error("wrong type of argument " + i + ` for ${opname} : ${args[i].typecheck().fmt()}`);

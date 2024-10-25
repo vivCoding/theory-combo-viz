@@ -34,7 +34,7 @@ export const setTheory = {
   name: "set",
   test_ast: (value: any) => {
     if (typeof value === "string") { 
-      return ["set.union", "set.intersect", "set.single", "set.elemof"].includes(value);
+      return ["set.union", "set.intersect", "set.single", "set.elemof", "set.diff", "set.empty"].includes(value);
     }
     return false;
   },

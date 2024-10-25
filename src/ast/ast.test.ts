@@ -1,9 +1,10 @@
 
-import { Ast} from "./ast";
+import { Ast, SORT} from "./ast";
 import { add, Int, intval, mul } from "./theories/int";
 import { and, Bool, neq } from "./theories/logic";
 import { Set, elemof, set, single } from "./theories/set";
 import { baseTheory, intTheory, purification, purifyAst, setTheory } from "../purification/theory";
+import { freeconstants_map, UNIFY } from "./typecheck";
 
 
 
@@ -24,3 +25,9 @@ test('nested_set', () => {
 
   expect(ast.typecheck()).toEqual(Set(Set(Int)))
 });
+
+test('unify', () => {
+  const a = SORT.constant("a");
+  const constants = freeconstants_map([a]);
+  expect(UNIFY(Set(Int), Set(a), constants)).toBe(true);
+})

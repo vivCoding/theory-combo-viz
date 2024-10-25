@@ -5,7 +5,7 @@ export function to_clauses(ast: Ast) : Ast[] {
   var result = [] as Ast[];
 
   function inner(ast: Ast) {
-    if(ast.name == "/\\") {
+    if(ast.value == "and") {
       for (const arg of ast.args || []) {
         inner(arg);
       }

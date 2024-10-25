@@ -133,8 +133,12 @@ export class ConstId {
 }
 
 // Create a constant (actually a variable in `def-var`, but everybody is calling this 'constant')
-var counter = 0;
-export function constant(sort: SortAst, name: string = "") {
-  if(name == '') { name = 'v' + (counter++).toString(); }
+var counter = new Map<string, number>();
+export function constant(sort: SortAst, name: string) {
+  if(name.includes('$')) {
+    const id = counter.get(name) || 0;
+    counter.set(name, id + 1);
+    name = name.replace('$', id.toString());
+  }
   return operator(name, new ConstId(name), basicOp([], sort), { type: 'function' });
 }

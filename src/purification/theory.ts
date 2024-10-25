@@ -1,5 +1,6 @@
 import { Ast, ConstId } from "../ast/ast";
 import { eq } from "../ast/theories/logic";
+import { to_clauses } from "./utils";
 
 
 export type Theory = {
@@ -65,7 +66,7 @@ function purifyAstInner(theory: Theory, ast: Ast, result: Ast[]): Ast {
   } else {
     const ty = ast.typecheck();
     if(ty == 'sort') { throw new Error(); }
-    const c = ty.constant('') as Ast;
+    const c = ty.constant('p$') as Ast;
     result.push(eq(ast, c));
     return c;
   }
@@ -93,6 +94,8 @@ function purificationInner(theories: Theory[], ast: Ast, result: Ast[][]) {
 
 export function purification(theories: Theory[], ast: Ast) : Ast[][] {
   var result: Ast[][] = theories.map(() => []);
-  purificationInner(theories, ast, result);
+  for(const a of to_clauses(ast)) {
+    purificationInner(theories, a, result);
+  }
   return result;
 }

@@ -17,7 +17,7 @@ export function basicOp(
       throw new Error(`wrong number of arguments for ${opname}`);
     }
     for(let i = 0; i < args.length; i++) {
-      if(argtypes[i] != 'any' && args[i].typecheck() != argtypes[i]) {
+      if(argtypes[i] != 'any' && eq(args[i].typecheck(), argtypes[i])) {
           throw new Error("wrong type of argument " + i + ` for ${opname}`);
       }
     }
@@ -39,14 +39,18 @@ export function varargOp(
   }
 }
 
-type Op = {name: string, fmt: (this: Ast, prec?: number) => string, typecheck: (this: Ast) => Ast | 'sort'};
+export type Op = {name: string, value: any,
+  fmt: (this: Ast, prec?: number) => string, typecheck: (this: Ast) => Ast | 'sort',
+  equals: (this: Ast, other: Ast) => boolean,
+};
 
 export function operator(
     name: string,
     tychk: TypeChecker,
-    formatting: OpFormatting = { type: 'function' }
+    formatting: OpFormatting = { type: 'function' },
+    value: any = null,
 ) : Op {
-    return { name, 
+    return { name, value,
       fmt: function(this: Ast, prec?: number) {
         const args = this.args || [];
         prec = prec || 0;
@@ -68,7 +72,15 @@ export function operator(
         }
         return result
       },
-      typecheck: function (this) { return tychk(name, this.args || []); }
+      typecheck: function (this) { return tychk(name, this.args || []); },
+      equals: function (this, that) {
+        if(!('name' in that)) { return false; }
+        if(this.name != that.name) { return false; }
+        if(this.value && that.value && !eq(this.value, that.value)) { return false; }
+        const thisargs = this.args || [];
+        const thatargs = that.args || [];
+        return  thisargs.length == thatargs.length && thisargs.every((a, i) => a.equals(thatargs[i]));
+      },
     };
 }
 
@@ -91,7 +103,16 @@ export function sort(name: string, args: (Ast | 'sort')[] = []) {
   return {...op, constant: (name: string) => constant(op, name)};
 }
 
+export class Var {
+  constructor(public name: string) {}
+}
+
 export function constant(sort: Op, name: string = "") {
   if(name == '') { name = 'v' + Math.floor(Math.random() * 1000000).toString(16); }
-  return operator(name, basicOp([], sort));
+  return operator(name, basicOp([], sort), { type: 'function' }, new Var(name));
+}
+
+export function eq(a: any, b: any) {
+  if (a.equals && b.equals) { return a.equals(b); }
+  else { return a == b; }
 }

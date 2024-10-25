@@ -10,5 +10,5 @@ export const mul = opfunc("*", varargOp(Int, Int), {type: 'infix', prec: 200});
 export const div = opfunc("/", varargOp(Int, Int), {type: 'infix', prec: 200});
 
 export function intval(n: number) {
-  return {...operator(n.toString(), basicOp([], Int), { type: 'function' }), value: n};
+  return {...operator(n.toString(), basicOp([], Int), { type: 'function' }, n)};
 }

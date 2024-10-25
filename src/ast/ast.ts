@@ -1,6 +1,6 @@
 
 // Function to compare two objects, if they have an equals method, use it, otherwise use the == operator
-export function eq(a: any, b: any) {
+export function EQ(a: any, b: any) {
   if (a.equals && b.equals) { return a.equals(b); }
   else { return a === b; }
 }
@@ -14,18 +14,18 @@ export type OpFormatting =
   { type: 'bracket', prec?: undefined};
 
 // Type checker function used by Op
-export type TypeChecker = (opname: string, args: Ast[]) => Ast | 'sort';
+export type TypeChecker = (opname: string, args: Ast[]) => SortAst | 'sort';
 
 export function basicOp(
-    argtypes: (Ast | 'sort' | 'any')[],
-    rettype: Ast | 'sort',
+    argtypes: (SortAst | 'sort' | 'any')[],
+    rettype: SortAst | 'sort',
 ) : TypeChecker {
   return (opname: string, args: Ast[]) => {
     if(args.length != argtypes.length) {
       throw new Error(`wrong number of arguments for ${opname}`);
     }
     for(let i = 0; i < args.length; i++) {
-      if(argtypes[i] != 'any' && eq(args[i].typecheck(), argtypes[i])) {
+      if(argtypes[i] != 'any' && EQ(args[i].typecheck(), argtypes[i])) {
           throw new Error("wrong type of argument " + i + ` for ${opname}`);
       }
     }
@@ -34,8 +34,8 @@ export function basicOp(
 }
 
 export function varargOp(
-    argtype: Ast | 'sort' | 'any',
-    rettype: Ast | 'sort',
+    argtype: SortAst | 'sort' | 'any',
+    rettype: SortAst | 'sort',
 ) : TypeChecker {
   return (opname: string, args: Ast[]) => {
     for(let i = 0; i < args.length; i++) {
@@ -52,13 +52,15 @@ export type Op = {
   name: string, // This is just a name for printing
   value: any, // This is the actual value of the operator
   fmt: (this: Ast, prec?: number) => string, // the formatting function
-  typecheck: (this: Ast) => Ast | 'sort', // the type checker function
+  typecheck: (this: Ast) => SortAst | 'sort', // the type checker function
   equals: (this: Ast, other: Ast) => boolean, // the equality function
 };
 
 // This is the type of an AST node, tricky typescript technique.
-// This Ast is also used to represent Sort. Since sometimes sort is an expression.
 export type Ast = Op & {args?: Ast[]};
+
+// This Ast is also used to represent Sort. Since sometimes sort is an expression.
+export type SortAst = Ast & { args?: SortAst[], constant: (this: SortAst, name: string) => Op };
 
 // This is the function to create an `Op`
 export function operator(
@@ -93,7 +95,7 @@ export function operator(
       equals: function (this, that) {
         if(!('name' in that)) { return false; }
         if(this.name != that.name) { return false; }
-        if(this.value && that.value && !eq(this.value, that.value)) { return false; }
+        if(this.value && that.value && !EQ(this.value, that.value)) { return false; }
         const thisargs = this.args || [];
         const thatargs = that.args || [];
         return  thisargs.length == thatargs.length && thisargs.every((a, i) => a.equals(thatargs[i]));
@@ -120,9 +122,9 @@ export class SortId {
 }
 
 // Create a sort
-export function sort(name: string, args: (Ast | 'sort')[] = []) {
+export function sort(name: string, args: (SortAst | 'sort')[] = []) : SortAst {
   const op = operator(name, new SortId(name), basicOp(args, 'sort'))
-  return {...op, constant: (name: string) => constant(op, name)};
+  return {...op, constant: function(this, name) { return constant(this, name) } };
 }
 
 // Use class as identififer. `==` will compare the reference.
@@ -131,7 +133,7 @@ export class ConstId {
 }
 
 // Create a constant (actually a variable in `def-var`, but everybody is calling this 'constant')
-export function constant(sort: Op, name: string = "") {
+export function constant(sort: SortAst, name: string = "") {
   if(name == '') { name = 'v' + Math.floor(Math.random() * 1000000).toString(16); }
   return operator(name, new ConstId(name), basicOp([], sort), { type: 'function' });
 }

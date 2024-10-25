@@ -1,4 +1,4 @@
-import { Ast, eq as eqq, basicOp, operator, opfunc, sort, varargOp } from "../ast";
+import { Ast, EQ, SortAst, basicOp, operator, opfunc, sort, varargOp } from "../ast";
 
 export const Bool = sort("Bool");
 
@@ -6,11 +6,11 @@ export const and = opfunc("/\\", "and", varargOp(Bool, Bool), { type: 'infix', p
 export const or = opfunc("\\/", "or", varargOp(Bool, Bool), { type: 'infix', prec: 60 });
 export const not = opfunc("¬", "not", basicOp([Bool], Bool), { type: 'prefix', prec: 500 });
 
-function same_type_bool(opname: string, args: Ast[]) : Ast {
+function same_type_bool(opname: string, args: Ast[]) : SortAst {
   if(args.length != 2) {
       throw new Error(`wrong number of arguments for ${opname}`);
   }
-  if(!eqq(args[0].typecheck(), args[1].typecheck())) {
+  if(!EQ(args[0].typecheck(), args[1].typecheck())) {
       throw new Error(`wrong type of arguments for ${opname}`);
   }
   return Bool;

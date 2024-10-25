@@ -92,9 +92,11 @@ export function sort(name: string) : SortAst {
   return {...op, constant: function(this, name) { return constant(this, name) } };
 }
 
+// Sort for all sorts
 export const SORT = {... operator('SORT', new SortId('SORT'), basicOp([], null as unknown as SortAst)), 
   constant: function(this: SortAst, name: string) { return constant(this, name) as unknown as SortAst } };
 
+// Create a sort that can create new sorts.
 export function sortfunc(name: string, args: (SortAst)[] = []) : (...args: SortAst[]) => SortAst {
   const op = operator(name, new SortId(name), basicOp(args, SORT));
   const sort: SortAst = {...op, constant: function(this, name) { return constant(this, name) } };

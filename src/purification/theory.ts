@@ -1,4 +1,4 @@
-import { Ast, ConstId } from "../ast/ast";
+import { Ast, ConstId, SORT } from "../ast/ast";
 import { eq } from "../ast/theories/logic";
 import { to_clauses } from "./utils";
 
@@ -65,7 +65,7 @@ function purifyAstInner(theory: Theory, ast: Ast, result: Ast[]): Ast {
     return ast
   } else {
     const ty = ast.typecheck();
-    if(ty == 'sort') { throw new Error(); }
+    if(ty === SORT) { throw new Error(); }
     const c = ty.constant('p$') as Ast;
     result.push(eq(ast, c));
     return c;
@@ -79,7 +79,6 @@ export function purifyAst(theory: Theory, ast: Ast) : {purified: Ast, rest: Ast[
 }
 
 function purificationInner(theories: Theory[], ast: Ast, result: Ast[][]) {
-  console.log(ast);
   const theory = get_theory_rec(theories, ast);
   const theory_i = theories.indexOf(theory);
   if (theory_i == -1) { throw new Error(`Ast from Unknown Theory: ${ast}`); }

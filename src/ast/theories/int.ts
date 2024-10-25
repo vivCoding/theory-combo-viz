@@ -1,4 +1,5 @@
-import { Ast, basicOp, operator, sort, constant, opfunc, varargOp } from "../ast";
+import { Ast, operator, sort, constant, opfunc } from "../ast";
+import { basicOp, varargOp } from "../typecheck";
 import { Bool } from "./logic";
 
 

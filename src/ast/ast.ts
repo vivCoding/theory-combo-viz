@@ -1,9 +1,8 @@
 
-// Function to compare two objects, if they have an equals method, use it, otherwise use the == operator
-export function EQ(a: any, b: any) {
-  if (a.equals && b.equals) { return a.equals(b); }
-  else { return a === b; }
-}
+import { Sort } from "z3-solver";
+import { EQ, basicOp, TypeChecker } from "./typecheck";
+
+
 
 // Formatting methods for the AST
 export type OpFormatting = 
@@ -13,46 +12,12 @@ export type OpFormatting =
   { type: 'function', prec?: undefined} |
   { type: 'bracket', prec?: undefined};
 
-// Type checker function used by Op
-export type TypeChecker = (opname: string, args: Ast[]) => SortAst | 'sort';
-
-export function basicOp(
-    argtypes: (SortAst | 'sort' | 'any')[],
-    rettype: SortAst | 'sort',
-) : TypeChecker {
-  return (opname: string, args: Ast[]) => {
-    if(args.length != argtypes.length) {
-      throw new Error(`wrong number of arguments for ${opname}`);
-    }
-    for(let i = 0; i < args.length; i++) {
-      if(argtypes[i] != 'any' && EQ(args[i].typecheck(), argtypes[i])) {
-          throw new Error("wrong type of argument " + i + ` for ${opname}`);
-      }
-    }
-    return rettype;
-  }
-}
-
-export function varargOp(
-    argtype: SortAst | 'sort' | 'any',
-    rettype: SortAst | 'sort',
-) : TypeChecker {
-  return (opname: string, args: Ast[]) => {
-    for(let i = 0; i < args.length; i++) {
-      if(argtype != 'any' && args[i].typecheck() != argtype) {
-          throw new Error("wrong type of argument " + i + ` for ${opname}`);
-      }
-    }
-    return rettype;
-  }
-}
-
 // Type of a Operator, without any arguments
 export type Op = {
   name: string, // This is just a name for printing
   value: any, // This is the actual value of the operator
   fmt: (this: Ast, prec?: number) => string, // the formatting function
-  typecheck: (this: Ast) => SortAst | 'sort', // the type checker function
+  typecheck: (this: Ast) => SortAst, // the type checker function
   equals: (this: Ast, other: Ast) => boolean, // the equality function
 };
 
@@ -122,9 +87,20 @@ export class SortId {
 }
 
 // Create a sort
-export function sort(name: string, args: (SortAst | 'sort')[] = []) : SortAst {
-  const op = operator(name, new SortId(name), basicOp(args, 'sort'))
+export function sort(name: string) : SortAst {
+  const op = operator(name, new SortId(name), basicOp([], SORT))
   return {...op, constant: function(this, name) { return constant(this, name) } };
+}
+
+export const SORT = {... operator('SORT', new SortId('SORT'), basicOp([], null as unknown as SortAst)), 
+  constant: function(this: SortAst, name: string) { return constant(this, name) as unknown as SortAst } };
+
+export function sortfunc(name: string, args: (SortAst)[] = []) : (...args: SortAst[]) => SortAst {
+  const op = operator(name, new SortId(name), basicOp(args, SORT));
+  const sort: SortAst = {...op, constant: function(this, name) { return constant(this, name) } };
+  return (...args: SortAst[]) => {
+    return {...sort, args};
+  };
 }
 
 // Use class as identififer. `==` will compare the reference.

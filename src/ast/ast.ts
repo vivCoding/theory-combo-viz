@@ -46,9 +46,9 @@ export type Op = {name: string, value: any,
 
 export function operator(
     name: string,
+    value: any,
     tychk: TypeChecker,
     formatting: OpFormatting = { type: 'function' },
-    value: any = null,
 ) : Op {
     return { name, value,
       fmt: function(this: Ast, prec?: number) {
@@ -86,10 +86,11 @@ export function operator(
 
 export function opfunc(
   name: string,
+  value: any,
   tychk: TypeChecker,
   formatting: OpFormatting = { type: 'function' }
 ) {
-  const op = operator(name, tychk, formatting);
+  const op = operator(name, value, tychk, formatting);
   return (...args: Ast[]) => {
     return {...op, args};
   }
@@ -98,8 +99,12 @@ export function opfunc(
 
 export type Ast = Op & {args?: Ast[]};
 
+export class Sort {
+  constructor(public name: string) {}
+}
+
 export function sort(name: string, args: (Ast | 'sort')[] = []) {
-  const op = operator(name, basicOp(args, 'sort'))
+  const op = operator(name, new Sort(name), basicOp(args, 'sort'))
   return {...op, constant: (name: string) => constant(op, name)};
 }
 
@@ -109,7 +114,7 @@ export class Var {
 
 export function constant(sort: Op, name: string = "") {
   if(name == '') { name = 'v' + Math.floor(Math.random() * 1000000).toString(16); }
-  return operator(name, basicOp([], sort), { type: 'function' }, new Var(name));
+  return operator(name, new Var(name), basicOp([], sort), { type: 'function' });
 }
 
 export function eq(a: any, b: any) {

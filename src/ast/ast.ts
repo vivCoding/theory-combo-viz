@@ -133,7 +133,8 @@ export class ConstId {
 }
 
 // Create a constant (actually a variable in `def-var`, but everybody is calling this 'constant')
+var counter = 0;
 export function constant(sort: SortAst, name: string = "") {
-  if(name == '') { name = 'v' + Math.floor(Math.random() * 1000000).toString(16); }
+  if(name == '') { name = 'v' + (counter++).toString(); }
   return operator(name, new ConstId(name), basicOp([], sort), { type: 'function' });
 }

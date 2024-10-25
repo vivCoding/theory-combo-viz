@@ -1,4 +1,11 @@
 
+// Function to compare two objects, if they have an equals method, use it, otherwise use the == operator
+export function eq(a: any, b: any) {
+  if (a.equals && b.equals) { return a.equals(b); }
+  else { return a == b; }
+}
+
+// Formatting methods for the AST
 export type OpFormatting = 
   { type: 'prefix', prec: number } |
   { type: 'infix', prec: number } |
@@ -6,6 +13,7 @@ export type OpFormatting =
   { type: 'function', prec?: undefined} |
   { type: 'bracket', prec?: undefined};
 
+// Type checker function used by Op
 export type TypeChecker = (opname: string, args: Ast[]) => Ast | 'sort';
 
 export function basicOp(
@@ -39,11 +47,19 @@ export function varargOp(
   }
 }
 
-export type Op = {name: string, value: any,
-  fmt: (this: Ast, prec?: number) => string, typecheck: (this: Ast) => Ast | 'sort',
-  equals: (this: Ast, other: Ast) => boolean,
+// Type of a Operator, without any arguments
+export type Op = {
+  name: string, // This is just a name for printing
+  value: any, // This is the actual value of the operator
+  fmt: (this: Ast, prec?: number) => string, // the formatting function
+  typecheck: (this: Ast) => Ast | 'sort', // the type checker function
+  equals: (this: Ast, other: Ast) => boolean, // the equality function
 };
 
+// This is the type of an AST node, tricky typescript technique.
+export type Ast = Op & {args?: Ast[]};
+
+// This is the function to create an `Op`
 export function operator(
     name: string,
     value: any,
@@ -84,6 +100,7 @@ export function operator(
     };
 }
 
+// This will create an `Op` and then return a function to create an Ast
 export function opfunc(
   name: string,
   value: any,
@@ -96,28 +113,24 @@ export function opfunc(
   }
 }
 
-
-export type Ast = Op & {args?: Ast[]};
-
+// Use class as identififer. `==` will compare the reference.
 export class SortId {
   constructor(public name: string) {}
 }
 
+// Create a sort
 export function sort(name: string, args: (Ast | 'sort')[] = []) {
   const op = operator(name, new SortId(name), basicOp(args, 'sort'))
   return {...op, constant: (name: string) => constant(op, name)};
 }
 
+// Use class as identififer. `==` will compare the reference.
 export class ConstId {
   constructor(public name: string) {}
 }
 
+// Create a constant (actually a variable in `def-var`, but everybody is calling this 'constant')
 export function constant(sort: Op, name: string = "") {
   if(name == '') { name = 'v' + Math.floor(Math.random() * 1000000).toString(16); }
   return operator(name, new ConstId(name), basicOp([], sort), { type: 'function' });
-}
-
-export function eq(a: any, b: any) {
-  if (a.equals && b.equals) { return a.equals(b); }
-  else { return a == b; }
 }

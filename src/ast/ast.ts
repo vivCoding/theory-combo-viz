@@ -57,6 +57,7 @@ export type Op = {
 };
 
 // This is the type of an AST node, tricky typescript technique.
+// This Ast is also used to represent Sort. Since sometimes sort is an expression.
 export type Ast = Op & {args?: Ast[]};
 
 // This is the function to create an `Op`

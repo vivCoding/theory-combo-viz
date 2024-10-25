@@ -2,7 +2,7 @@
 // Function to compare two objects, if they have an equals method, use it, otherwise use the == operator
 export function eq(a: any, b: any) {
   if (a.equals && b.equals) { return a.equals(b); }
-  else { return a == b; }
+  else { return a === b; }
 }
 
 // Formatting methods for the AST

@@ -1,4 +1,5 @@
 import { Ast, basicOp, operator, sort, constant, opfunc, varargOp } from "../ast";
+import { Bool } from "./logic";
 
 
 export const Int = sort("Int");
@@ -12,3 +13,8 @@ export const div = opfunc("/", "int.div", varargOp(Int, Int), {type: 'infix', pr
 export function intval(n: number) {
   return {...operator(n.toString(), n, basicOp([], Int), { type: 'function' })};
 }
+
+export const gt = opfunc(">", "int.gt", basicOp([Int, Int], Bool), {type: 'infix', prec: 15});
+export const lt = opfunc("<", "int.lt", basicOp([Int, Int], Bool), {type: 'infix', prec: 15});
+export const ge = opfunc(">=", "int.ge", basicOp([Int, Int], Bool), {type: 'infix', prec: 15});
+export const le = opfunc("<=", "int.le", basicOp([Int, Int], Bool), {type: 'infix', prec: 15});

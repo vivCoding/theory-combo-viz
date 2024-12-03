@@ -1,27 +1,39 @@
 {
-    "search.exclude": {
-      "package-lock.json": true,
-      "yarn.lock": true,
-      "pnpm-lock.yaml": true
-    },
-  
-    "editor.formatOnSave": true,
-    "editor.codeActionsOnSave": {
-      "source.fixAll": "explicit",
-      "source.addMissingImports": "explicit"
-    },
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    // force usage of local config
-    "prettier.configPath": "./.prettierrc",
-  
-    // override user's indentation settings (helps when creating new files/auto commenting)
-    "editor.indentSize": 2,
-    "editor.tabSize": 2,
-    "editor.detectIndentation": false,
-  
-    "files.associations": {
-      "*.css": "tailwindcss",
-      "*.svg": "html"
-    }
+  "search.exclude": {
+    "package-lock.json": true,
+    "yarn.lock": true,
+    "pnpm-lock.yaml": true
+  },
+
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit",
+    "source.addMissingImports": "explicit"
+  },
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  // force usage of local config
+  "prettier.configPath": "./.prettierrc",
+
+  // override user's indentation settings (helps when creating new files/auto commenting)
+  "editor.indentSize": 2,
+  "editor.tabSize": 2,
+  "editor.detectIndentation": false,
+
+  "files.associations": {
+    "*.css": "tailwindcss",
+    "*.svg": "html"
+  },
+  "files.exclude": {
+    "**/*.vo": true,
+    "**/*.vok": true,
+    "**/*.vos": true,
+    "**/*.aux": true,
+    "**/*.glob": true,
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/CVS": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true
   }
-  
+}

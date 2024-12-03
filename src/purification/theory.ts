@@ -41,14 +41,14 @@ export const setTheory = {
 }
 
 
-function get_theory(theories: Theory[], value: any) : Theory {
+function get_theory_single(theories: Theory[], value: any) : Theory {
   const result = theories.find(t => t.test_ast(value))
   if(!result) { throw new Error(`No theory found for ${value}`); }
   return result;
 }
 
 function get_theory_rec(theories: Theory[], ast: Ast) : Theory {
-  const theory = get_theory(theories, ast.value);
+  const theory = get_theory_single(theories, ast.value);
   if (theory != baseTheory) { return theory; }
   for (const arg of ast.args || []) {
     const th = get_theory_rec(theories, arg)
@@ -56,7 +56,6 @@ function get_theory_rec(theories: Theory[], ast: Ast) : Theory {
   }
   return baseTheory;
 }
-
 
 
 function purifyAstInner(theory: Theory, ast: Ast, result: Ast[]): Ast {

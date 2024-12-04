@@ -12,7 +12,7 @@ function setWitnessInner(ast: Ast, vars: ConstId[]): Ast {
     const constants = freeconstants_map([_a])
     if(UNIFY(ast.args![0].typecheck(), Set(_a), constants)) {
       const ty = REPLACE(_a, constants) as SortAst;
-      const c_e = ty.constant('e$');
+      const c_e = ty.constant('__e$');
       vars.push(c_e);
       return elemof(c_e, union(diff(ast.args![0], ast.args![1]), diff(ast.args![1], ast.args![0])));
     }

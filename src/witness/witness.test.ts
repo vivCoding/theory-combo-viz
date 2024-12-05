@@ -8,6 +8,5 @@ test("basic", () => {
   const b = Int.constant("b")
   const S = Set(Int).constant("S")
   const ast = and(neq(set(a, b), S), eq(set(a, b, add(a, b)), S), eq(b, intval(0)))
-  console.log(setWitness(ast).vars)
   expect(setWitness(ast).ast).not.toEqual(ast)
 })

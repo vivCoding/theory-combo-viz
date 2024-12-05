@@ -4,10 +4,16 @@ import _ from 'lodash';
 import { freeconstants_map, REPLACE, UNIFY } from "../ast/typecheck";
 export type WitnessFunc = (ast: Ast) => Ast;
 
-function setWitnessInner(ast: Ast, vars: ConstId[]): Ast {
+function setWitnessInner(ast: Ast, vars: ConstId[], isnegation: boolean=false): Ast {
   ast = _.cloneDeep(ast);
-  ast.args = ast.args?.map((x) => setWitnessInner(x, vars));
-  if(ast.value === "neq") {
+  if(ast.value === "not") {
+    ast.args = [setWitnessInner(ast.args![0], vars, !isnegation)];
+  } else if(ast.value === "implies") {
+    ast.args = [setWitnessInner(ast.args![0], vars, !isnegation), setWitnessInner(ast.args![1], vars, isnegation)];
+  } else {
+    ast.args = ast.args?.map((x) => setWitnessInner(x, vars, isnegation));
+  }
+  if(isnegation && ast.value === "eq" || !isnegation && ast.value === "neq") {
     const _a = SORT.constant("'a")
     const constants = freeconstants_map([_a])
     if(UNIFY(ast.args![0].typecheck(), Set(_a), constants)) {

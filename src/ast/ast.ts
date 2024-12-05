@@ -130,6 +130,9 @@ export class ConstId {
     }
     return this.name == that.name;
   }
+  as_ast() {
+    return operator(this.name, this, basicOp([], this.sort), { type: 'function' });
+  }
 }
 
 // Create a constant (actually a variable in `def-var`, but everybody is calling this 'constant')
@@ -140,5 +143,5 @@ export function constant(sort: SortAst, name: string) {
     counter.set(name, id + 1)
     name = name.replace("$", id.toString())
   }
-  return operator(name, new ConstId(name, sort), basicOp([], sort), { type: 'function' });
+  return new ConstId(name, sort).as_ast();
 }

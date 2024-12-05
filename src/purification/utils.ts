@@ -16,7 +16,7 @@ export function to_clauses(ast: Ast) : Ast[] {
 }
 
 export function variables(ast: Ast) : ConstId[] {
-  var result = [] as ConstId[];
+  var result = new Map<string, ConstId>();
   inner(ast);
 
   function inner(ast: Ast) {
@@ -24,9 +24,9 @@ export function variables(ast: Ast) : ConstId[] {
       inner(arg);
     }
     if (ast.value instanceof ConstId) {
-      result.push(ast.value as ConstId);
+      result.set(ast.value.name, ast.value as ConstId);
     }
   }
 
-  return result;
+  return result.values().toArray();
 }

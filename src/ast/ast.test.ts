@@ -112,6 +112,16 @@ test("set intersect 2", async () => {
   expect(result.status).toStrictEqual("unsat")
 })
 
+test("set intersect ", async () => {
+  const a = Int.constant("a")
+  const b = Int.constant("b")
+  const S = set(a)
+  const T = set(a, b)
+
+  const result = await solve(not(implies(and(neq(a, b)), neq(intersect(S, T), empty(Int)))))
+  expect(result.status).toStrictEqual("unsat")
+})
+
 test("set diff", async () => {
   const a = Int.constant("a")
   const b = Int.constant("b")

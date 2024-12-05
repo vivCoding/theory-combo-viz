@@ -152,7 +152,7 @@ test("set diff 3", async () => {
   expect(result.status).toStrictEqual("unsat")
 })
 
-test.only("int arith", async () => {
+test("int arith", async () => {
   // doesn't test rigorously, but meh we don't need to
   let res = await solve(neq(add(intval(2), intval(3)), intval(5)))
   expect(res.status).toStrictEqual("unsat")
@@ -198,17 +198,17 @@ test("set+int example 3", async () => {
   expect(result.status).toStrictEqual("unsat")
 })
 
-test("set+int example 4", async () => {
+test.only("set+int example 4", async () => {
   const S = set(add(intval(2), intval(3)), mul(intval(1), intval(2)))
   const T = set(add(intval(1), intval(4)))
 
   // S = {2 + 3, 1 * 2}
   // T = {1 + 4}
   // S | T & {3} == empty
-  let result = await solve(not(eq(intersect(union(S, T), set(intval(3)), empty(Int)))))
+  let result = await solve(not(eq(intersect(union(S, T), set(intval(3))), empty(Int))))
   expect(result.status).toStrictEqual("unsat")
 
   // S | T & {5, 6} == {5}
-  result = await solve(not(eq(intersect(union(S, T), set(intval(5), intval(6)), set(intval(5))))))
+  result = await solve(not(eq(intersect(union(S, T), set(intval(5), intval(6))), set(intval(5)))))
   expect(result.status).toStrictEqual("unsat")
 })

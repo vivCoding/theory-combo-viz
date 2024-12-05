@@ -1,6 +1,6 @@
 import { result } from "lodash"
 import { Ast, SORT } from "./ast"
-import { add, Int, intval, mul } from "./theories/int"
+import { add, div, Int, intval, mul, sub } from "./theories/int"
 import { and, Bool, eq, implies, neq, not } from "./theories/logic"
 import { Set, diff, elemof, empty, intersect, set, single, subsetof, union } from "./theories/set"
 import { freeconstants_map, UNIFY } from "./typecheck"
@@ -142,7 +142,63 @@ test("set diff 3", async () => {
   expect(result.status).toStrictEqual("unsat")
 })
 
-test("int arith", async () => {
-  const res = await solve(neq(add(intval(2), intval(3)), intval(5)))
+test.only("int arith", async () => {
+  // doesn't test rigorously, but meh we don't need to
+  let res = await solve(neq(add(intval(2), intval(3)), intval(5)))
   expect(res.status).toStrictEqual("unsat")
+  res = await solve(neq(mul(intval(2), intval(3)), intval(6)))
+  expect(res.status).toStrictEqual("unsat")
+  res = await solve(neq(sub(intval(3), intval(2)), intval(1)))
+  expect(res.status).toStrictEqual("unsat")
+  res = await solve(neq(div(intval(6), intval(2)), intval(3)))
+  expect(res.status).toStrictEqual("unsat")
+})
+
+test("set+int example 1", async () => {
+  const S = Set(Int).constant("set")
+  const a = add(intval(2), intval(3))
+  const b = intval(5)
+
+  // a in S --> b in S
+  let result = await solve(not(implies(elemof(a, S), elemof(b, S))))
+  expect(result.status).toStrictEqual("unsat")
+
+  // S = {a} --> S == {b}
+  result = await solve(not(implies(eq(S, set(a)), elemof(b, S))))
+  expect(result.status).toStrictEqual("unsat")
+})
+
+test("set+int example 2", async () => {
+  // S = {2 + 3}
+  // T = {1 + 4}
+  const S = set(add(intval(2), intval(3)))
+  const T = set(add(intval(1), intval(4)))
+
+  // S \ T == empty
+  let result = await solve(not(eq(diff(S, T), empty(Int))))
+  expect(result.status).toStrictEqual("unsat")
+})
+
+test("set+int example 3", async () => {
+  const S = set(add(intval(2), intval(3)))
+  const T = set(add(intval(1), intval(4)))
+
+  // S | T == {4}
+  let result = await solve(not(eq(union(S, T), set(intval(5)))))
+  expect(result.status).toStrictEqual("unsat")
+})
+
+test("set+int example 4", async () => {
+  const S = set(add(intval(2), intval(3)), mul(intval(1), intval(2)))
+  const T = set(add(intval(1), intval(4)))
+
+  // S = {2 + 3, 1 * 2}
+  // T = {1 + 4}
+  // S | T & {3} == empty
+  let result = await solve(not(eq(intersect(union(S, T), set(intval(3)), empty(Int)))))
+  expect(result.status).toStrictEqual("unsat")
+
+  // S | T & {5, 6} == {5}
+  result = await solve(not(eq(intersect(union(S, T), set(intval(5), intval(6)), set(intval(5))))))
+  expect(result.status).toStrictEqual("unsat")
 })

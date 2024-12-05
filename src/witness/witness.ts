@@ -13,7 +13,7 @@ function setWitnessInner(ast: Ast, vars: ConstId[]): Ast {
     if(UNIFY(ast.args![0].typecheck(), Set(_a), constants)) {
       const ty = REPLACE(_a, constants) as SortAst;
       const c_e = ty.constant('__e$');
-      vars.push(c_e);
+      vars.push(c_e.value);
       return elemof(c_e, union(diff(ast.args![0], ast.args![1]), diff(ast.args![1], ast.args![0])));
     }
   }

@@ -1,9 +1,10 @@
 
 import { Ast, SORT} from "./ast";
 import { add, Int, intval, mul } from "./theories/int";
-import { and, Bool, neq } from "./theories/logic";
-import { Set, elemof, set, single } from "./theories/set";
+import { and, Bool, implies, neq, not } from "./theories/logic";
+import { Set, elemof, set, single, subsetof } from "./theories/set";
 import { freeconstants_map, UNIFY } from "./typecheck";
+import { solve } from "./z3convert";
 
 
 
@@ -29,4 +30,16 @@ test('unify', () => {
   const a = SORT.constant("a");
   const constants = freeconstants_map([a]);
   expect(UNIFY(Set(Int), Set(a), constants)).toBe(true);
+})
+
+test('example 1', async () => {
+  const S = Set(Int).constant("set");
+  const a = Int.constant("a");
+  const b = Int.constant("b");
+  
+  const result = await solve(not(
+    implies(and(elemof(a, S), elemof(b, S)), subsetof(set(a, b), S))
+  ));
+
+  expect(result.status).toStrictEqual('unsat')
 })

@@ -107,7 +107,13 @@ export function sortfunc(name: string, args: (SortAst)[] = []) : (...args: SortA
 
 // Use class as identififer. `==` will compare the reference.
 export class ConstId {
-  constructor(public name: string) {}
+  constructor(public name: string, public sort: SortAst) {}
+  equals(that: ConstId) {
+    if(this.name == that.name && !this.sort.equals(that.sort)) {
+      throw new Error(`ConstId ${this.name} has different sorts`);
+    }
+    return this.name == that.name;
+  }
 }
 
 // Create a constant (actually a variable in `def-var`, but everybody is calling this 'constant')
@@ -118,5 +124,5 @@ export function constant(sort: SortAst, name: string) {
     counter.set(name, id + 1);
     name = name.replace('$', id.toString());
   }
-  return operator(name, new ConstId(name), basicOp([], sort), { type: 'function' });
+  return operator(name, new ConstId(name, sort), basicOp([], sort), { type: 'function' });
 }

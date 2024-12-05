@@ -579,7 +579,7 @@ function createAst(data: any) {
   }
 }
 
-function parseMain(input: string) {
+export function parseMain(input: string) {
   varMap = {}
   setEmptyVarsCt = 0
   const parser = new Parser(Grammar.fromCompiled(grammar))

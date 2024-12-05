@@ -350,103 +350,6 @@ function typeinferVars(data: any) {
   }
 }
 
-function remakeParseTree(data: any) {
-  // console.log(varMap)
-  switch (data.type) {
-    case "arithOp":
-      return data
-    case "const":
-      return data
-    case "var":
-      return data
-    case "mathCompOp":
-      const mcl = typeinferVars(data.left)
-      const mcr = typeinferVars(data.right)
-      if (data.op == "==" || data.op == "!=") {
-        if (mcl === Types.Int && mcr === Types.Int) {
-          data.type = "mathCompOp"
-          return data
-        } else if (mcl === Types.Bool && mcr === Types.Bool) {
-          data.type = "logicCompOp"
-          return data
-        } else if (getParentType(mcl) === Types.Set && getParentType(mcr) === Types.Set) {
-          data.type = "setCompOp"
-          return data
-        } else {
-          throw "idk what to do here"
-        }
-      }
-      return data
-    case "not":
-      return data
-    case "logicCompOp":
-      const lcl = typeinferVars(data.left)
-      const lcr = typeinferVars(data.right)
-      if (data.op == "==" || data.op == "!=") {
-        if (lcl === Types.Int && lcr === Types.Int) {
-          data.type = "mathCompOp"
-          return data
-        } else if (lcl === Types.Bool && lcr === Types.Bool) {
-          data.type = "logicCompOp"
-          return data
-        } else if (getParentType(lcl) === Types.Set && getParentType(lcr) === Types.Set) {
-          data.type = "setCompOp"
-          return data
-        } else {
-          throw "idk what to do here"
-        }
-      }
-      return data
-    case "set":
-      return data
-    case "setOp":
-      return data
-    case "setCompOp":
-      const scl = typeinferVars(data.left)
-      const scr = typeinferVars(data.right)
-      if (data.op == "==" || data.op == "!=") {
-        if (scl === Types.Int && scr === Types.Int) {
-          data.type = "mathCompOp"
-          return data
-        } else if (scl === Types.Bool && scr === Types.Bool) {
-          data.type = "logicCompOp"
-          return data
-        } else if (getParentType(scl) === Types.Set && getParentType(scr) === Types.Set) {
-          data.type = "setCompOp"
-          return data
-        } else {
-          throw "idk what to do here"
-        }
-      }
-      return data
-    case "setElemOp":
-      return data
-    case "setEmpty":
-      return CType(Types.Set, Types.Unknown)
-    case "pred":
-      data.value = remakeParseTree(data.value)
-      return data
-    case "disjunct":
-      const newPreds = []
-      for (const elem of data.preds) {
-        newPreds.push(remakeParseTree(elem))
-      }
-      data.preds = newPreds
-      return data
-    case "conjunct":
-      const newPreds2 = []
-      for (const elem of data.preds) {
-        newPreds2.push(remakeParseTree(elem))
-      }
-      data.preds = newPreds2
-      return data
-    default:
-      console.log("YIKES this shouldn't have happened", data)
-      throw "YIKES this shouldn't have happened" + data
-    // return Types.Unknown
-  }
-}
-
 function createAst(data: any) {
   switch (data.type) {
     case "arithOp":
@@ -465,6 +368,9 @@ function createAst(data: any) {
           throw "YIKES this shouldn't have happened " + data.type + " " + data.op
       }
     case "const":
+      if (data.value < 0) {
+        return neg(intval(data.value))
+      }
       return intval(data.value)
     case "var":
       const vType = varMap[data.name].type

@@ -9,6 +9,7 @@ const lexer = moo.compile({
   and: /\\\//,
   or: /\/\\/,
   notOp:  /!/,
+  arrayWrite: /\-\>/,
   arithOp:  /\+|\-|\*|\//,
   paren: /\(|\)/,
   setUnion: /\|/,
@@ -18,6 +19,7 @@ const lexer = moo.compile({
   setNotIn: /∉/,
   setEmpty: /∅/,
   setBrackets: /\{|\}/,
+  arrayBrackets: /\[|\]/,
   comma: ",",
 });
 %}
@@ -27,7 +29,7 @@ main -> cnf {% id %}
 
 
 
-mathexp -> sum {% id %}
+mathExp -> sum {% id %}
 
 sumOp -> "+" | "-"
 sum ->
@@ -38,26 +40,21 @@ productOp -> "*" | "/" product ->
     product productOp mathval {% (data) => ({ type: "arithOp", left: data[0], op: data[1][0].value, right: data[2] }) %}
   | mathval {% id %}
 
-mathval -> literal {% id %} | "(" mathexp ")" {% (data) => data[1] %}
+mathval -> literal {% id %} | "(" mathExp ")" {% (data) => data[1] %}
 
 literal -> number {% id %} | variable {% id %}
 number -> %number {% (data) => ({ type: "const", value: parseInt(data.join("")) }) %}
 variable -> %word {% (data) => ({ type: "var", name: data.join("") }) %}
 
-mathCompOp -> ">=" | "<=" | ">" | "<" | "==" | "!="
-mathPred -> mathexp mathCompOp mathexp {% (data) => ({ type: "mathCompOp", left: data[0], op: data[1][0].value, right: data[2] }) %}
+mathCompOp -> ">=" | "<=" | ">" | "<"
+mathPred -> mathExp mathCompOp mathExp {% (data) => ({ type: "mathCompOp", left: data[0], op: data[1][0].value, right: data[2] }) %}
 
-logicval -> [!]:? variable {% (data) => {return data[0] !== null ? { type: "not", value: data[1] } : data[1] } %}
-logicCompOp -> "==" | "!="
-logicPred ->
-  logicval logicCompOp logicval {% (data) => ({ type: "logicCompOp", left: data[0], op: data[1][0].value, right: data[2] }) %}
-  | logicval {% id %}
+# unused
+# logicval -> [!]:? variable {% (data) => {return data[0] !== null ? { type: "not", value: data[1] } : data[1] } %}
 
 
-# TODO add other stuff
 
-
-setElem -> number {% id %} | variable {% id %}
+setElem -> number {% id %} | variable {% id %} | mathExp {% id %}
 setElems ->
   setElem "," setElems {% (data) => [data[0]].flat().concat(data[2]) %}
   | setElem {% id %}
@@ -80,17 +77,30 @@ setVal ->
   | "(" setExp ")" {% (data) => data[1] %}
 
 setElemOp -> %setIn | %setNotIn
-setElemPred -> variable setElemOp setExp {% (data) => ({ type: "setElemOp", left: data[0], op: data[1][0].value, right: data[2] })  %}
-setCompOp -> "==" | "!="
-setPred ->
-  setElemPred {% id %}
-  | setExp setCompOp setExp {% (data) => ({ type: "setCompOp", left: data[0], op: data[1][0].value, right: data[2] })  %}
+setElemPred -> (variable | number | mathExp) setElemOp setExp {% (data) => ({ type: "setElemOp", left: data[0], op: data[1][0].value, right: data[2] })  %}
+
+
+arrayValue -> number {% id %} | variable {% id %} | mathExp {% id %}
+arrayIndexValue -> number {% id %} | variable {% id %} | mathExp {% id %}
+arrayRead -> variable "[" arrayIndexValue "]" {% (data) => ({ type: "arrayRead", arr: data[0], idx: data[2] })  %}
+arrayWrite -> variable "[" arrayIndexValue "->" arrayValue "]" {% (data) => ({ type: "arrayWrite", arr: data[0], idx: data[2], value: data[4] })  %}
+array -> arrayWrite {% id %} | variable {% id %}
+
+  
+
+eqCompOp -> "==" | "!="
+eqPred ->
+  mathExp eqCompOp mathExp {% (data) => ({ type: "eqCompOp", left: data[0], op: data[1][0].value, right: data[2] }) %}
+  | setExp eqCompOp setExp {% (data) => ({ type: "eqCompOp", left: data[0], op: data[1][0].value, right: data[2] }) %}
+  | arrayRead eqCompOp arrayValue {% (data) => ({ type: "eqCompOp", left: data[0], op: data[1][0].value, right: data[2] }) %}
+  | array eqCompOp array {% (data) => ({ type: "eqCompOp", left: data[0], op: data[1][0].value, right: data[2] }) %}
+
 
 
 pred ->
-  logicPred {% (data) => ({ type: "pred", value: data[0] }) %}
+  eqPred {% (data) => ({ type: "pred", value: data[0] }) %}
   | mathPred {% (data) => ({ type: "pred", value: data[0] }) %}
-  | setPred {% (data) => ({ type: "pred", value: data[0] }) %}
+  | setElemPred {% (data) => ({ type: "pred", value: data[0] }) %}
 
 disjunct ->
   pred {% id %}

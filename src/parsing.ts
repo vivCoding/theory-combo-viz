@@ -6,8 +6,6 @@ import { Bool, and, eq, neq, not, or } from "./ast/theories/logic.js"
 import { Set, elemof, empty, intersect, set, union } from "./ast/theories/set.js"
 import { Ast } from "./ast/ast.js"
 
-const parser = new Parser(Grammar.fromCompiled(grammar))
-
 function flattenConjuntDisjunct(data: any): any {
   if (data.type === "conjunct" || data.type === "disjunct") {
     const newPreds = []
@@ -577,36 +575,32 @@ function createAst(data: any) {
 function parseMain(input: string) {
   varMap = {}
   setEmptyVarsCt = 0
+  const parser = new Parser(Grammar.fromCompiled(grammar))
   parser.feed(input.split(" ").join("").trim())
 
   if (parser.results.length < 1) throw "bad parsing"
   const res = parser.results[0]
   const t1 = flattenConjuntDisjunct(res)
-  writeFileSync("output.json", JSON.stringify(t1, null, 2))
+  // writeFileSync("output.json", JSON.stringify(t1, null, 2))
 
   const t2 = createSetEmptyVars(t1)
   // figure out the type/sorts of each var
   for (let i = 0; i < 3; i++) {
     typeinferVars(t2)
   }
-  // try {
-  //   // TODO do not allow free vars if there are still unknowns, just assume every unknown variable is an int
-  //   // for (let vname in varMap) {
-  //   //   varMap[vname].type.replaceAll(Types.Unknown, Types.Int)
-  //   // }
-  // } catch {
-  //   throw "bad typing"
-  // }
-  console.log(varMap)
+  // if there are still unknowns, just assume every unknown variable is an int
+  // TODO maybe remove free variables
+  for (let vname in varMap) {
+    varMap[vname].type.replaceAll(Types.Unknown, Types.Int)
+  }
 
   const parseTree = t2
 
-  writeFileSync("output2.json", JSON.stringify(parseTree, null, 2))
-
-  // const ast = createAst(parseTree)
+  const ast = createAst(parseTree)
   // console.log(ast.fmt())
   // console.log(ast.typecheck())
   // console.log(JSON.stringify(flattenConjuntDisjunct(res), null, 2).replaceAll("\\\\", "\\"))
+  return ast
 }
 
 // const input = "(x1 + 2 * 3) * 3 != 2"
@@ -620,10 +614,11 @@ function parseMain(input: string) {
 // const input = "(1 == 2 + -1 \\/ 3 + 2 > 1 \\/ a \\/ b) /\\ a ∈ x /\\ x == ∅ /\\ b ∈ x"
 // const input = "a == 1 /\\ a ∈ x /\\ x == ∅"
 // const input = "x == {1, 2, 3} | {4, 5, y} /\\ a != x"
-// const input = "x == {a, b, c} /\\ c == 1"
+const input = "x == {a, b, c} /\\ c == 1"
 
 // const input = "a[x] == 1 /\\ x == 2"
 // const input = "a[1 -> x] == y /\\ x == 5 + 3"
-const input = "a[1 + 2 -> x] == y /\\ x == 5 + 3"
+// const input = "a[1 + 2 -> x] == y /\\ x == 5 + 3"
 // const input = "a[1 -> x] == a[x -> 1]"
-parseMain(input)
+console.log(parseMain(input).fmt())
+console.log(parseMain(input).typecheck())

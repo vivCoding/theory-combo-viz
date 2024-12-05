@@ -1,6 +1,3 @@
-
-
-
 // const result = purification([baseTheory, intTheory, setTheory], ast)
 
 // for (const th of result) {
@@ -9,4 +6,3 @@
 //   }
 //   console.log("-----")
 // }
-

@@ -548,7 +548,14 @@ function createAst(data: any) {
     case "setElemOp":
       const sel: Ast = createAst(data.left)
       const ser: Ast = createAst(data.right)
-      return elemof(sel, ser)
+      switch (data.op) {
+        case "∈":
+          return elemof(sel, ser)
+        case "∉":
+          return not(elemof(sel, ser))
+        default:
+          throw "YIKES this shouldn't have happened " + data.type + " " + data.op
+      }
     case "setEmpty":
       throw "shouldn't happen, all setEmpty should be gone"
     case "pred":

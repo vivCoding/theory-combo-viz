@@ -1,0 +1,52 @@
+[
+  {
+    "type": "purification",
+    "f1": "__p0 ∊ x ∧ __p1 ∊ y ∧ x ∩ y = ∅ ∧ x != y",
+    "f2": "1 = __p0 ∧ 2 = __p1 ∧ x != y",
+    "oldVars": [
+      "x",
+      "y"
+    ],
+    "newVars": [
+      "__p0",
+      "__p1"
+    ]
+  },
+  {
+    "type": "witness",
+    "f1": "__p0 ∊ x ∧ __p1 ∊ y ∧ x ∩ y = ∅ ∧ __e0 ∊ x \\ y ∪ y \\ x",
+    "changed": true,
+    "newVars": [
+      "__e0"
+    ]
+  },
+  {
+    "type": "arrangement",
+    "arrangement": [
+      {
+        "var1": "__p0",
+        "op": "!=",
+        "var2": "__p1"
+      },
+      {
+        "var1": "__p0",
+        "op": "!=",
+        "var2": "__e0"
+      },
+      {
+        "var1": "__p1",
+        "op": "!=",
+        "var2": "__e0"
+      },
+      {
+        "var1": "x",
+        "op": "!=",
+        "var2": "y"
+      }
+    ],
+    "f1": "__p0 ∊ x ∧ __p1 ∊ y ∧ x ∩ y = ∅ ∧ __e0 ∊ x \\ y ∪ y \\ x ∧ ARR",
+    "f2": "1 = __p0 ∧ 2 = __p1 ∧ x != y ∧ ARR",
+    "result1": "sat",
+    "result2": "sat"
+  }
+]

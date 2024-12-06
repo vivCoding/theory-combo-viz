@@ -1,0 +1,426 @@
+[
+  {
+    "type": "purification",
+    "f1": "x = {__p0} ∪ {__p1} ∧ __p2 ∊ x ∧ ¬(__p3 ∊ x)",
+    "f2": "3 + 5 = __p0 ∧ 1 = __p1 ∧ 8 = __p2 ∧ 2 - 1 = __p3",
+    "oldVars": [
+      "x"
+    ],
+    "newVars": [
+      "__p0",
+      "__p1",
+      "__p2",
+      "__p3"
+    ]
+  },
+  {
+    "type": "witness",
+    "f1": "x = {__p0} ∪ {__p1} ∧ __p2 ∊ x ∧ ¬(__p3 ∊ x)",
+    "changed": false
+  },
+  {
+    "type": "arrangement",
+    "arrangement": [
+      {
+        "var1": "__p0",
+        "op": "!=",
+        "var2": "__p1"
+      },
+      {
+        "var1": "__p0",
+        "op": "!=",
+        "var2": "__p2"
+      },
+      {
+        "var1": "__p0",
+        "op": "!=",
+        "var2": "__p3"
+      },
+      {
+        "var1": "__p1",
+        "op": "!=",
+        "var2": "__p2"
+      },
+      {
+        "var1": "__p1",
+        "op": "!=",
+        "var2": "__p3"
+      },
+      {
+        "var1": "__p2",
+        "op": "!=",
+        "var2": "__p3"
+      }
+    ],
+    "f1": "x = {__p0} ∪ {__p1} ∧ __p2 ∊ x ∧ ¬(__p3 ∊ x) ∧ ARR",
+    "f2": "3 + 5 = __p0 ∧ 1 = __p1 ∧ 8 = __p2 ∧ 2 - 1 = __p3 ∧ ARR",
+    "result1": "unsat",
+    "result2": "unsat"
+  },
+  {
+    "type": "arrangement",
+    "arrangement": [
+      {
+        "var1": "__p2",
+        "op": "=",
+        "var2": "__p3"
+      },
+      {
+        "var1": "__p0",
+        "op": "!=",
+        "var2": "__p1"
+      },
+      {
+        "var1": "__p0",
+        "op": "!=",
+        "var2": "__p2"
+      },
+      {
+        "var1": "__p1",
+        "op": "!=",
+        "var2": "__p2"
+      }
+    ],
+    "f1": "x = {__p0} ∪ {__p1} ∧ __p2 ∊ x ∧ ¬(__p3 ∊ x) ∧ ARR",
+    "f2": "3 + 5 = __p0 ∧ 1 = __p1 ∧ 8 = __p2 ∧ 2 - 1 = __p3 ∧ ARR",
+    "result1": "unsat",
+    "result2": "unsat"
+  },
+  {
+    "type": "arrangement",
+    "arrangement": [
+      {
+        "var1": "__p1",
+        "op": "=",
+        "var2": "__p2"
+      },
+      {
+        "var1": "__p0",
+        "op": "!=",
+        "var2": "__p1"
+      },
+      {
+        "var1": "__p0",
+        "op": "!=",
+        "var2": "__p3"
+      },
+      {
+        "var1": "__p1",
+        "op": "!=",
+        "var2": "__p3"
+      }
+    ],
+    "f1": "x = {__p0} ∪ {__p1} ∧ __p2 ∊ x ∧ ¬(__p3 ∊ x) ∧ ARR",
+    "f2": "3 + 5 = __p0 ∧ 1 = __p1 ∧ 8 = __p2 ∧ 2 - 1 = __p3 ∧ ARR",
+    "result1": "sat",
+    "result2": "unsat"
+  },
+  {
+    "type": "arrangement",
+    "arrangement": [
+      {
+        "var1": "__p1",
+        "op": "=",
+        "var2": "__p3"
+      },
+      {
+        "var1": "__p0",
+        "op": "!=",
+        "var2": "__p1"
+      },
+      {
+        "var1": "__p0",
+        "op": "!=",
+        "var2": "__p2"
+      },
+      {
+        "var1": "__p1",
+        "op": "!=",
+        "var2": "__p2"
+      }
+    ],
+    "f1": "x = {__p0} ∪ {__p1} ∧ __p2 ∊ x ∧ ¬(__p3 ∊ x) ∧ ARR",
+    "f2": "3 + 5 = __p0 ∧ 1 = __p1 ∧ 8 = __p2 ∧ 2 - 1 = __p3 ∧ ARR",
+    "result1": "unsat",
+    "result2": "unsat"
+  },
+  {
+    "type": "arrangement",
+    "arrangement": [
+      {
+        "var1": "__p1",
+        "op": "=",
+        "var2": "__p2"
+      },
+      {
+        "var1": "__p2",
+        "op": "=",
+        "var2": "__p3"
+      },
+      {
+        "var1": "__p0",
+        "op": "!=",
+        "var2": "__p1"
+      }
+    ],
+    "f1": "x = {__p0} ∪ {__p1} ∧ __p2 ∊ x ∧ ¬(__p3 ∊ x) ∧ ARR",
+    "f2": "3 + 5 = __p0 ∧ 1 = __p1 ∧ 8 = __p2 ∧ 2 - 1 = __p3 ∧ ARR",
+    "result1": "unsat",
+    "result2": "unsat"
+  },
+  {
+    "type": "arrangement",
+    "arrangement": [
+      {
+        "var1": "__p0",
+        "op": "=",
+        "var2": "__p1"
+      },
+      {
+        "var1": "__p0",
+        "op": "!=",
+        "var2": "__p2"
+      },
+      {
+        "var1": "__p0",
+        "op": "!=",
+        "var2": "__p3"
+      },
+      {
+        "var1": "__p2",
+        "op": "!=",
+        "var2": "__p3"
+      }
+    ],
+    "f1": "x = {__p0} ∪ {__p1} ∧ __p2 ∊ x ∧ ¬(__p3 ∊ x) ∧ ARR",
+    "f2": "3 + 5 = __p0 ∧ 1 = __p1 ∧ 8 = __p2 ∧ 2 - 1 = __p3 ∧ ARR",
+    "result1": "unsat",
+    "result2": "unsat"
+  },
+  {
+    "type": "arrangement",
+    "arrangement": [
+      {
+        "var1": "__p0",
+        "op": "=",
+        "var2": "__p1"
+      },
+      {
+        "var1": "__p2",
+        "op": "=",
+        "var2": "__p3"
+      },
+      {
+        "var1": "__p0",
+        "op": "!=",
+        "var2": "__p2"
+      }
+    ],
+    "f1": "x = {__p0} ∪ {__p1} ∧ __p2 ∊ x ∧ ¬(__p3 ∊ x) ∧ ARR",
+    "f2": "3 + 5 = __p0 ∧ 1 = __p1 ∧ 8 = __p2 ∧ 2 - 1 = __p3 ∧ ARR",
+    "result1": "unsat",
+    "result2": "unsat"
+  },
+  {
+    "type": "arrangement",
+    "arrangement": [
+      {
+        "var1": "__p0",
+        "op": "=",
+        "var2": "__p2"
+      },
+      {
+        "var1": "__p0",
+        "op": "!=",
+        "var2": "__p1"
+      },
+      {
+        "var1": "__p0",
+        "op": "!=",
+        "var2": "__p3"
+      },
+      {
+        "var1": "__p1",
+        "op": "!=",
+        "var2": "__p3"
+      }
+    ],
+    "f1": "x = {__p0} ∪ {__p1} ∧ __p2 ∊ x ∧ ¬(__p3 ∊ x) ∧ ARR",
+    "f2": "3 + 5 = __p0 ∧ 1 = __p1 ∧ 8 = __p2 ∧ 2 - 1 = __p3 ∧ ARR",
+    "result1": "sat",
+    "result2": "unsat"
+  },
+  {
+    "type": "arrangement",
+    "arrangement": [
+      {
+        "var1": "__p0",
+        "op": "=",
+        "var2": "__p2"
+      },
+      {
+        "var1": "__p1",
+        "op": "=",
+        "var2": "__p3"
+      },
+      {
+        "var1": "__p0",
+        "op": "!=",
+        "var2": "__p1"
+      }
+    ],
+    "f1": "x = {__p0} ∪ {__p1} ∧ __p2 ∊ x ∧ ¬(__p3 ∊ x) ∧ ARR",
+    "f2": "3 + 5 = __p0 ∧ 1 = __p1 ∧ 8 = __p2 ∧ 2 - 1 = __p3 ∧ ARR",
+    "result1": "unsat",
+    "result2": "sat"
+  },
+  {
+    "type": "arrangement",
+    "arrangement": [
+      {
+        "var1": "__p0",
+        "op": "=",
+        "var2": "__p1"
+      },
+      {
+        "var1": "__p1",
+        "op": "=",
+        "var2": "__p2"
+      },
+      {
+        "var1": "__p0",
+        "op": "!=",
+        "var2": "__p3"
+      }
+    ],
+    "f1": "x = {__p0} ∪ {__p1} ∧ __p2 ∊ x ∧ ¬(__p3 ∊ x) ∧ ARR",
+    "f2": "3 + 5 = __p0 ∧ 1 = __p1 ∧ 8 = __p2 ∧ 2 - 1 = __p3 ∧ ARR",
+    "result1": "sat",
+    "result2": "unsat"
+  },
+  {
+    "type": "arrangement",
+    "arrangement": [
+      {
+        "var1": "__p0",
+        "op": "=",
+        "var2": "__p3"
+      },
+      {
+        "var1": "__p0",
+        "op": "!=",
+        "var2": "__p1"
+      },
+      {
+        "var1": "__p0",
+        "op": "!=",
+        "var2": "__p2"
+      },
+      {
+        "var1": "__p1",
+        "op": "!=",
+        "var2": "__p2"
+      }
+    ],
+    "f1": "x = {__p0} ∪ {__p1} ∧ __p2 ∊ x ∧ ¬(__p3 ∊ x) ∧ ARR",
+    "f2": "3 + 5 = __p0 ∧ 1 = __p1 ∧ 8 = __p2 ∧ 2 - 1 = __p3 ∧ ARR",
+    "result1": "unsat",
+    "result2": "unsat"
+  },
+  {
+    "type": "arrangement",
+    "arrangement": [
+      {
+        "var1": "__p0",
+        "op": "=",
+        "var2": "__p3"
+      },
+      {
+        "var1": "__p1",
+        "op": "=",
+        "var2": "__p2"
+      },
+      {
+        "var1": "__p0",
+        "op": "!=",
+        "var2": "__p1"
+      }
+    ],
+    "f1": "x = {__p0} ∪ {__p1} ∧ __p2 ∊ x ∧ ¬(__p3 ∊ x) ∧ ARR",
+    "f2": "3 + 5 = __p0 ∧ 1 = __p1 ∧ 8 = __p2 ∧ 2 - 1 = __p3 ∧ ARR",
+    "result1": "unsat",
+    "result2": "unsat"
+  },
+  {
+    "type": "arrangement",
+    "arrangement": [
+      {
+        "var1": "__p0",
+        "op": "=",
+        "var2": "__p1"
+      },
+      {
+        "var1": "__p1",
+        "op": "=",
+        "var2": "__p3"
+      },
+      {
+        "var1": "__p0",
+        "op": "!=",
+        "var2": "__p2"
+      }
+    ],
+    "f1": "x = {__p0} ∪ {__p1} ∧ __p2 ∊ x ∧ ¬(__p3 ∊ x) ∧ ARR",
+    "f2": "3 + 5 = __p0 ∧ 1 = __p1 ∧ 8 = __p2 ∧ 2 - 1 = __p3 ∧ ARR",
+    "result1": "unsat",
+    "result2": "unsat"
+  },
+  {
+    "type": "arrangement",
+    "arrangement": [
+      {
+        "var1": "__p0",
+        "op": "=",
+        "var2": "__p2"
+      },
+      {
+        "var1": "__p2",
+        "op": "=",
+        "var2": "__p3"
+      },
+      {
+        "var1": "__p0",
+        "op": "!=",
+        "var2": "__p1"
+      }
+    ],
+    "f1": "x = {__p0} ∪ {__p1} ∧ __p2 ∊ x ∧ ¬(__p3 ∊ x) ∧ ARR",
+    "f2": "3 + 5 = __p0 ∧ 1 = __p1 ∧ 8 = __p2 ∧ 2 - 1 = __p3 ∧ ARR",
+    "result1": "unsat",
+    "result2": "unsat"
+  },
+  {
+    "type": "arrangement",
+    "arrangement": [
+      {
+        "var1": "__p0",
+        "op": "=",
+        "var2": "__p1"
+      },
+      {
+        "var1": "__p1",
+        "op": "=",
+        "var2": "__p2"
+      },
+      {
+        "var1": "__p2",
+        "op": "=",
+        "var2": "__p3"
+      }
+    ],
+    "f1": "x = {__p0} ∪ {__p1} ∧ __p2 ∊ x ∧ ¬(__p3 ∊ x) ∧ ARR",
+    "f2": "3 + 5 = __p0 ∧ 1 = __p1 ∧ 8 = __p2 ∧ 2 - 1 = __p3 ∧ ARR",
+    "result1": "unsat",
+    "result2": "unsat"
+  }
+]

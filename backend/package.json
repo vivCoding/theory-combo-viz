@@ -1,0 +1,35 @@
+{
+  "name": "combo-server",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "tsc": "tsc",
+    "tsc:watch": "tsc -w",
+    "grammar-compile": "nearleyc ./src/grammar/main.ne -o ./src/grammar.js",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc && node dist/index.js",
+    "test": "jest --detectOpenHandles",
+    "test-thing": "jest --detectOpenHandles --silent=false -t \"thing\""
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "http-status-codes": "^2.3.0",
+    "lodash": "^4.17.21",
+    "moo": "^0.5.2",
+    "nearley": "^2.20.1",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2",
+    "z3-solver": "file:./src/z3"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/jest": "^29.5.14",
+    "@types/lodash": "^4.17.13",
+    "@types/nearley": "^2.11.5",
+    "@types/node": "^22.10.1",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.5"
+  }
+}

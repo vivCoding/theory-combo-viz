@@ -1,0 +1,64 @@
+{
+  "env": {
+    "browser": true,
+    "es2021": true
+  },
+  "extends": ["next/core-web-vitals", "prettier"],
+  "rules": {},
+  "overrides": [
+    {
+      "extends": ["next/core-web-vitals", "prettier", "plugin:@typescript-eslint/recommended"],
+      "files": ["**/*.ts", "**/*.tsx"],
+      "parser": "@typescript-eslint/parser",
+      "plugins": ["@typescript-eslint"],
+      "parserOptions": {
+        "project": "./tsconfig.json"
+      },
+      "rules": {
+        // formatting, unncessary since prettier takes care already
+        // "indent": ["error", 2],
+        "linebreak-style": "off",
+        "quotes": ["error", "double"],
+        "semi": ["error", "never"],
+        // eslint typescript stuff
+        "@typescript-eslint/no-unused-vars": "warn", // TODO change to error during production
+        "@typescript-eslint/consistent-type-imports": "error", // Ensure `import type` is used when it's necessary
+        "@typescript-eslint/no-explicit-any": "warn",
+        "no-var": "warn", // sometimes need this
+        "no-console": "warn",
+        "sort-imports": [
+          // default
+          "error",
+          {
+            "ignoreCase": false,
+            "ignoreDeclarationSort": true,
+            "ignoreMemberSort": false,
+            "memberSyntaxSortOrder": ["none", "all", "multiple", "single"],
+            "allowSeparatedGroups": true
+          }
+        ],
+        "import/order": [
+          "error",
+          {
+            "groups": [
+              "builtin", // Built-in imports (come from NodeJS native) go first
+              "external", // <- External imports
+              "internal", // <- Absolute imports
+              ["sibling", "parent"], // <- Relative imports, the sibling and parent types they can be mingled together
+              "index", // <- index imports
+              "unknown", // <- unknown imports
+              "type" // <- type imports
+            ],
+            "newlines-between": "always",
+            "alphabetize": {
+              /* sort in ascending order. Options: ["ignore", "asc", "desc"] */
+              "order": "asc",
+              /* ignore case. Options: [true, false] */
+              "caseInsensitive": true
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

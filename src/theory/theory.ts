@@ -1,5 +1,7 @@
-import { Ast, ConstId } from "../ast/ast"
+import { ConstId } from "../ast/ast"
 import { setWitness } from "../witness/witness"
+
+import type { Ast } from "../ast/ast"
 
 export type Theory = {
   name: string

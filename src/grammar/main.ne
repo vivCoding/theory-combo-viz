@@ -4,16 +4,16 @@ const moo = require("moo");
 const lexer = moo.compile({
   ws: /[ \t]+/,
   word: /[0-9]*[a-zA-Z]+[0-9]*/,
-  number: /\-?[0-9]+/,
   comparator:  />=|<=|>|<|==|!=/,
-  and: /\\\//,
-  or: /\/\\/,
+  and: /\∧/,
+  or: /\∨/,
   notOp:  /!/,
   arrayWrite: /\-\>/,
   arithOp:  /\+|\-|\*|\//,
+  number: /\-?[0-9]+/,
   paren: /\(|\)/,
-  setUnion: /\|/,
-  setIntersect: /\&/,
+  setUnion: /\∪/,
+  setIntersect: /\∩/,
   setDifference: /\\/,
   setIn: /∈/,
   setNotIn: /∉/,
@@ -77,7 +77,8 @@ setVal ->
   | "(" setExp ")" {% (data) => data[1] %}
 
 setElemOp -> %setIn | %setNotIn
-setElemPred -> (variable | number | mathExp) setElemOp setExp {% (data) => ({ type: "setElemOp", left: data[0], op: data[1][0].value, right: data[2] })  %}
+setElemValue -> variable {% id %} | number {% id %} | mathExp {% id %}
+setElemPred -> setElemValue setElemOp setExp {% (data) => ({ type: "setElemOp", left: data[0], op: data[1][0].value, right: data[2] })  %}
 
 
 arrayValue -> number {% id %} | variable {% id %} | mathExp {% id %}
@@ -104,12 +105,12 @@ pred ->
 
 disjunct ->
   pred {% id %}
-  | pred "\\/" disjunct {% (data) => ({ type: "disjunct", preds: [data[0]].concat(data[2]) }) %}
+  | pred %or disjunct {% (data) => ({ type: "disjunct", preds: [data[0]].concat(data[2]) }) %}
 
 conjunct ->
   pred {% id %}
   | "(" disjunct ")" {% (data) => data[1] %}
-  | conjunct "/\\" conjunct {% (data) => ({ type: "conjunct", preds: [data[0]].flat().concat(data[2]) }) %}
+  | conjunct %and conjunct {% (data) => ({ type: "conjunct", preds: [data[0]].flat().concat(data[2]) }) %}
 
 cnf ->
   disjunct {% id %}

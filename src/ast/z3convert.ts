@@ -1,9 +1,14 @@
-import z3, { Context, init, Model } from "z3-solver"
-import { Ast, ConstId, SortId } from "./ast"
 import _, { constant } from "lodash"
+import { init } from "z3-solver"
+
+import { ConstId, SortId } from "./ast"
 import * as int from "./theories/int"
 import * as logic from "./theories/logic"
 import * as set from "./theories/set"
+
+import type { Ast } from "./ast"
+import type z3 from "z3-solver"
+import type { Context, Model } from "z3-solver"
 
 export type Z3Converter = {
   [key: string]: (ctx: Context, args: any[], ast: Ast) => any

@@ -1,7 +1,7 @@
-import { add, Int, intval } from "../ast/theories/int"
-import { eq, and, neq, Bool } from "../ast/theories/logic"
-import { Set, set, single, elemof } from "../ast/theories/set"
 import { setWitness } from "./witness"
+import { Int, add, intval } from "../ast/theories/int"
+import { Bool, and, eq, neq } from "../ast/theories/logic"
+import { Set, elemof, set, single } from "../ast/theories/set"
 
 test("basic", () => {
   const a = Int.constant("a")

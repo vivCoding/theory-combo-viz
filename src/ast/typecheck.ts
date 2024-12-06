@@ -1,4 +1,6 @@
-import { Ast, ConstId, SortAst } from "./ast"
+import { ConstId } from "./ast"
+
+import type { Ast, SortAst } from "./ast"
 
 // Function to compare two objects, if they have an equals method, use it, otherwise use the == operator
 export function EQ(a: any, b: any) {
@@ -67,7 +69,7 @@ export function basicOp(argtypes: SortAst[], rettype: SortAst, freeconstants: As
     if (args.length != argtypes.length) {
       throw new Error(`wrong number of arguments for ${opname}`)
     }
-    var constants = freeconstants_map(freeconstants)
+    const constants = freeconstants_map(freeconstants)
     for (let i = 0; i < args.length; i++) {
       if (!UNIFY(args[i].typecheck(), argtypes[i], constants)) {
         throw new Error("wrong type of argument " + i + ` for ${opname} : ${args[i].typecheck().fmt()}`)
@@ -79,7 +81,7 @@ export function basicOp(argtypes: SortAst[], rettype: SortAst, freeconstants: As
 
 export function varargOp(argtype: SortAst, rettype: SortAst, freeconstants: Ast[] = []): TypeChecker {
   return (opname: string, args: Ast[]) => {
-    var constants = freeconstants_map(freeconstants)
+    const constants = freeconstants_map(freeconstants)
     for (let i = 0; i < args.length; i++) {
       if (!UNIFY(args[i].typecheck(), argtype, constants)) {
         throw new Error("wrong type of argument " + i + ` for ${opname} : ${args[i].typecheck().fmt()}`)

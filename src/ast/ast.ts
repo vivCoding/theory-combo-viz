@@ -1,5 +1,6 @@
-import { Sort } from "z3-solver"
-import { EQ, basicOp, TypeChecker } from "./typecheck"
+import { EQ, basicOp } from "./typecheck"
+
+import type { TypeChecker } from "./typecheck"
 
 // Formatting methods for the AST
 export type OpFormatting =
@@ -32,7 +33,7 @@ export function operator(name: string, value: any, tychk: TypeChecker, formattin
     fmt: function (this: Ast, prec?: number) {
       const args = this.args || []
       prec = prec || 0
-      var result = ""
+      let result = ""
       switch (formatting.type) {
         case "prefix":
           result = name + args.map((a) => a.fmt(formatting.prec || prec)).join(" ")
@@ -123,25 +124,28 @@ export function sortfunc(name: string, args: SortAst[] = []): (...args: SortAst[
 
 // Use class as identififer. `==` will compare the reference.
 export class ConstId {
-  constructor(public name: string, public sort: SortAst) {}
+  constructor(
+    public name: string,
+    public sort: SortAst
+  ) {}
   equals(that: ConstId) {
-    if(this.name == that.name && !this.sort.equals(that.sort)) {
-      throw new Error(`ConstId ${this.name} has different sorts`);
+    if (this.name == that.name && !this.sort.equals(that.sort)) {
+      throw new Error(`ConstId ${this.name} has different sorts`)
     }
-    return this.name == that.name;
+    return this.name == that.name
   }
   as_ast() {
-    return operator(this.name, this, basicOp([], this.sort), { type: 'function' });
+    return operator(this.name, this, basicOp([], this.sort), { type: "function" })
   }
 }
 
 // Create a constant (actually a variable in `def-var`, but everybody is calling this 'constant')
-var counter = new Map<string, number>()
+const counter = new Map<string, number>()
 export function constant(sort: SortAst, name: string) {
   if (name.includes("$")) {
     const id = counter.get(name) || 0
     counter.set(name, id + 1)
     name = name.replace("$", id.toString())
   }
-  return new ConstId(name, sort).as_ast();
+  return new ConstId(name, sort).as_ast()
 }

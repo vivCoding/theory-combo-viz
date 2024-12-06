@@ -1,4 +1,4 @@
-import { Ast, operator, opfunc, SORT, SortAst, sortfunc } from "../ast"
+import { Ast, SORT, SortAst, operator, opfunc, sortfunc } from "../ast"
 import { basicOp, varargOp } from "../typecheck"
 
 export const Arr = sortfunc("Arr", [SORT])

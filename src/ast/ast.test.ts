@@ -1,10 +1,10 @@
 import { result } from "lodash"
-import { Ast, SORT } from "./ast"
-import { add, div, Int, intval, mul, sub } from "./theories/int"
-import { and, Bool, eq, implies, neq, not } from "./theories/logic"
-import { Set, diff, elemof, empty, intersect, set, single, subsetof, union } from "./theories/set"
-import { freeconstants_map, UNIFY } from "./typecheck"
 
+import { Ast, SORT } from "./ast"
+import { Int, add, div, intval, mul, sub } from "./theories/int"
+import { Bool, and, eq, implies, neq, not } from "./theories/logic"
+import { Set, diff, elemof, empty, intersect, set, single, subsetof, union } from "./theories/set"
+import { UNIFY, freeconstants_map } from "./typecheck"
 import { solve } from "./z3convert"
 
 test("basic", () => {
@@ -185,7 +185,7 @@ test("set+int example 2", async () => {
   const T = set(add(intval(1), intval(4)))
 
   // S \ T == empty
-  let result = await solve(not(eq(diff(S, T), empty(Int))))
+  const result = await solve(not(eq(diff(S, T), empty(Int))))
   expect(result.status).toStrictEqual("unsat")
 })
 
@@ -194,7 +194,7 @@ test("set+int example 3", async () => {
   const T = set(add(intval(1), intval(4)))
 
   // S | T == {4}
-  let result = await solve(not(eq(union(S, T), set(intval(5)))))
+  const result = await solve(not(eq(union(S, T), set(intval(5)))))
   expect(result.status).toStrictEqual("unsat")
 })
 

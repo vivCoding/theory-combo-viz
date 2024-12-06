@@ -1,10 +1,11 @@
 import { Grammar, Parser } from "nearley"
-import grammar from "./grammar.js"
-import { writeFileSync } from "fs"
-import { Int, add, div, ge, gt, intval, le, lt, mul, neg, sub } from "./ast/theories/int.js"
-import { Bool, and, eq, neq, not, or } from "./ast/theories/logic.js"
-import { Set, elemof, empty, intersect, set, union } from "./ast/theories/set.js"
-import { Ast } from "./ast/ast.js"
+
+import { Int, add, div, ge, gt, intval, le, lt, mul, neg, sub } from "./ast/theories/int"
+import { Bool, and, eq, neq, not, or } from "./ast/theories/logic"
+import { Set, elemof, empty, intersect, set, union } from "./ast/theories/set"
+import grammar from "./grammar"
+
+import type { Ast } from "./ast/ast"
 
 function flattenConjuntDisjunct(data: any): any {
   if (data.type === "conjunct" || data.type === "disjunct") {
@@ -41,8 +42,7 @@ const Types = {
   Arr: CType("Arr"),
 }
 
-var varMap: Record<string, { type: Type }> = {}
-var setEmptyVarsCt = 0
+let setEmptyVarsCt = 0
 
 function createSetEmptyVars(data: any) {
   // console.log(varMap)
@@ -102,18 +102,18 @@ function createSetEmptyVars(data: any) {
       data.preds = newPreds2
       return data
     default:
-      console.log("YIKES this shouldn't have happened", data)
+      console.log("YIKES this shouldn't have happened, createEmptySetVars", data)
       throw "YIKES this shouldn't have happened" + data
     // return Types.Unknown
   }
 }
 
-function typeinferVars(data: any) {
-  // console.log(varMap)
+function typeinferVarsInner(data: any, varMap: Record<string, { type: Type }>) {
+  // console.log(data.type, varMap)
   switch (data.type) {
     case "arithOp":
-      const leftType = typeinferVars(data.left)
-      const rightType = typeinferVars(data.right)
+      const leftType = typeinferVarsInner(data.left, varMap)
+      const rightType = typeinferVarsInner(data.right, varMap)
       if (leftType !== Types.Unknown && leftType !== Types.Int) throw "bad type arith"
       if (rightType !== Types.Unknown && rightType !== Types.Int) throw "bad type arith"
       // both operands must be int
@@ -134,8 +134,8 @@ function typeinferVars(data: any) {
       }
       return varMap[data.name].type
     case "mathCompOp":
-      const mcl = typeinferVars(data.left)
-      const mcr = typeinferVars(data.right)
+      const mcl = typeinferVarsInner(data.left, varMap)
+      const mcr = typeinferVarsInner(data.right, varMap)
       if (mcl !== Types.Unknown && mcl !== Types.Int) throw "bad type mathCompOp"
       if (mcr !== Types.Unknown && mcr !== Types.Int) throw "bad type mathCompOp"
       // if variables unknown, set them to be int
@@ -147,7 +147,7 @@ function typeinferVars(data: any) {
       }
       return Types.Bool
     case "not":
-      // const notValType = typeinferVars(data.value)
+      // const notValType = typeinferVarsInner(data.value, varMap)
       // if (notValType !== Types.Unknown && notValType !== Types.Bool) {
       //   throw "bad type not"
       // }
@@ -156,12 +156,13 @@ function typeinferVars(data: any) {
       // }
       throw "not implemented logic"
     case "eqCompOp":
-      const el = typeinferVars(data.left)
-      const er = typeinferVars(data.right)
+      const el = typeinferVarsInner(data.left, varMap)
+      const er = typeinferVarsInner(data.right, varMap)
       if (el !== Types.Unknown && er !== Types.Unknown && getParentType(el) !== getParentType(er)) throw "bad type eqCompOp (parent)"
       const cel = getChildrenType(el)
       const cer = getChildrenType(er)
-      if (cel !== Types.Unknown && cer !== Types.Unknown && cel !== cer) throw "bad type eqCompOp (children)"
+      if (getParentType(el) !== Types.Unknown && getParentType(er) !== Types.Unknown && cel !== Types.Unknown && cer !== Types.Unknown && cel !== cer)
+        throw "bad type eqCompOp (children)"
       // check if both of them are vars, and if they are, assign types accordingingly
       // also check child types
       if (data.left.type == "var" && data.right.type == "var") {
@@ -210,7 +211,7 @@ function typeinferVars(data: any) {
       let currType = Types.Unknown
       const vars = []
       for (const elem of data.data) {
-        const elemType = typeinferVars(elem)
+        const elemType = typeinferVarsInner(elem, varMap)
         // if we have a var and its unknown, add it to vars so we'll set it later
         if (elem.type == "var" && elemType == Types.Unknown) {
           vars.push(elem)
@@ -218,7 +219,7 @@ function typeinferVars(data: any) {
           if (currType !== Types.Unknown && elemType !== currType) {
             throw "bad type set"
           }
-          currType = typeinferVars(elem)
+          currType = typeinferVarsInner(elem, varMap)
         }
       }
       // set all vars to have same type as other elements
@@ -227,38 +228,44 @@ function typeinferVars(data: any) {
       }
       return CType(Types.Set, currType)
     case "setOp":
-      const sl: Type = typeinferVars(data.left)
-      const sr: Type = typeinferVars(data.right)
-      if (sl !== Types.Unknown && getParentType(sl) !== Types.Set) throw "bad type setOp"
-      if (sr !== Types.Unknown && getParentType(sr) !== Types.Set) throw "bad type setOp"
+      const sl: Type = typeinferVarsInner(data.left, varMap)
+      const sr: Type = typeinferVarsInner(data.right, varMap)
+      if (sl !== Types.Unknown && getParentType(sl) !== Types.Set) throw "bad type setOp (parent left)" + data
+      if (sr !== Types.Unknown && getParentType(sr) !== Types.Set) throw "bad type setOp (parent right)" + data
       const csl = getChildrenType(sl)
       const csr = getChildrenType(sr)
       // if its children are not the same type, get outta here
-      if (csl !== Types.Unknown && csr !== Types.Unknown && csl !== csr) throw "bad type setOp"
+      if (csl !== Types.Unknown && csr !== Types.Unknown && csl !== csr) throw "bad type setOp (child)"
 
-      if (sl !== Types.Unknown || sr !== Types.Unknown) {
+      let finalType = sl
+
+      if (sl === Types.Unknown || sr === Types.Unknown) {
         // if some vars are unknown, set its type
-        if (data.left.type === "var") {
-          varMap[data.left.name].type = sl === Types.Unknown ? sr : sl
+        if (data.left.type === "var" && sl === Types.Unknown) {
+          varMap[data.left.name].type = sr
+          finalType = sr
         }
-        if (data.right.type === "var") {
-          varMap[data.right.name].type = sl === Types.Unknown ? sr : sl
+        if (data.right.type === "var" && sr === Types.Unknown) {
+          varMap[data.right.name].type = sl
+          finalType = sl
         }
       }
-      if (csl !== Types.Unknown || csr !== Types.Unknown) {
+      if (csl === Types.Unknown || csr === Types.Unknown) {
         // if some elem types unknown, set its type
-        if (data.left.type === "var") {
-          varMap[data.left.name].type = csl === Types.Unknown ? csr : csl
+        if (data.left.type === "var" && csl === Types.Unknown) {
+          varMap[data.left.name].type = csr
+          finalType = CType(Types.Set, csr)
         }
-        if (data.right.type === "var") {
-          varMap[data.right.name].type = csl === Types.Unknown ? csr : csl
+        if (data.right.type === "var" && csr === Types.Unknown) {
+          varMap[data.right.name].type = csl
+          finalType = CType(Types.Set, csl)
         }
       }
-      return CType(Types.Set, csl === Types.Unknown ? csr : csl)
+      return finalType
     case "setElemOp":
-      const sel = typeinferVars(data.left)
-      let ser = typeinferVars(data.right)
-      if (ser !== Types.Unknown && getParentType(ser) !== Types.Set) throw "bad type setElemOp"
+      const sel = typeinferVarsInner(data.left, varMap)
+      let ser = typeinferVarsInner(data.right, varMap)
+      if (ser !== Types.Unknown && getParentType(ser) !== Types.Set) throw "bad type setElemOp (parent)"
       if (data.right.type === "var") {
         if (ser === Types.Unknown) {
           varMap[data.right.name].type = CType(Types.Set, Types.Unknown)
@@ -270,7 +277,7 @@ function typeinferVars(data: any) {
         if (cser === Types.Unknown) {
           varMap[data.right.name].type = CType(Types.Set, sel)
         } else if (sel !== cser) {
-          throw `bad type setElemOp`
+          throw "bad type setElemOp (child)"
         }
       } else {
         if (cser !== Types.Unknown) {
@@ -283,8 +290,8 @@ function typeinferVars(data: any) {
     case "setEmpty":
       throw "shouldn't happen, all setEmpty should be gone"
     case "arrayRead":
-      const arrt = typeinferVars(data.arr)
-      const idxt = typeinferVars(data.idx)
+      const arrt = typeinferVarsInner(data.arr, varMap)
+      const idxt = typeinferVarsInner(data.idx, varMap)
       if (arrt !== Types.Unknown && getParentType(arrt) !== Types.Arr) throw "bad type arrayRead"
       if (idxt !== Types.Unknown && idxt !== Types.Int) throw "bad type arrayRead"
 
@@ -298,9 +305,9 @@ function typeinferVars(data: any) {
       const elemType: Type = arrt === Types.Unknown ? Types.Unknown : getChildrenType(arrt)
       return elemType
     case "arrayWrite":
-      const awt = typeinferVars(data.arr)
-      const iwt = typeinferVars(data.idx)
-      const vt = typeinferVars(data.value)
+      const awt = typeinferVarsInner(data.arr, varMap)
+      const iwt = typeinferVarsInner(data.idx, varMap)
+      const vt = typeinferVarsInner(data.value, varMap)
       if (awt !== Types.Unknown && getParentType(awt) !== Types.Arr) throw "bad type arrayWrite (arr)"
       if (iwt !== Types.Unknown && iwt !== Types.Int) throw "bad type arrayWrite (idx)"
       // array read returns elem
@@ -324,7 +331,7 @@ function typeinferVars(data: any) {
       varMap[data.arr.name].type = CType(Types.Arr, et)
       return varMap[data.arr.name].type
     case "pred":
-      const pval: Type = typeinferVars(data.value)
+      const pval: Type = typeinferVarsInner(data.value, varMap)
       if (data.value.type === "var" && pval !== Types.Bool) {
         if (pval === Types.Unknown) {
           varMap[data.value.name].type = Types.Bool
@@ -335,12 +342,12 @@ function typeinferVars(data: any) {
       return Types.Bool
     case "disjunct":
       for (const elem of data.preds) {
-        typeinferVars(elem)
+        typeinferVarsInner(elem, varMap)
       }
       return Types.Bool
     case "conjunct":
       for (const elem of data.preds) {
-        typeinferVars(elem)
+        typeinferVarsInner(elem, varMap)
       }
       return Types.Bool
     default:
@@ -350,11 +357,11 @@ function typeinferVars(data: any) {
   }
 }
 
-function createAst(data: any) {
+function createAstInner(data: any, varMap: Record<string, { type: Type }>) {
   switch (data.type) {
     case "arithOp":
-      const left: Ast = createAst(data.left)
-      const right: Ast = createAst(data.right)
+      const left: Ast = createAstInner(data.left, varMap)
+      const right: Ast = createAstInner(data.right, varMap)
       switch (data.op) {
         case "+":
           return add(left, right)
@@ -403,8 +410,8 @@ function createAst(data: any) {
         return Int.constant(data.name)
       }
     case "mathCompOp":
-      const mcl: Ast = createAst(data.left)
-      const mcr: Ast = createAst(data.right)
+      const mcl: Ast = createAstInner(data.left, varMap)
+      const mcr: Ast = createAstInner(data.right, varMap)
       switch (data.op) {
         case ">=":
           return ge(mcl, mcr)
@@ -418,11 +425,11 @@ function createAst(data: any) {
           throw "YIKES this shouldn't have happened " + data.type + " " + data.op
       }
     case "not":
-      const val: Ast = createAst(data.value)
+      const val: Ast = createAstInner(data.value, varMap)
       return not(val)
     case "eqCompOp":
-      const lcl: Ast = createAst(data.left)
-      const lcr: Ast = createAst(data.right)
+      const lcl: Ast = createAstInner(data.left, varMap)
+      const lcr: Ast = createAstInner(data.right, varMap)
       switch (data.op) {
         case "==":
           return eq(lcl, lcr)
@@ -434,17 +441,17 @@ function createAst(data: any) {
     case "set":
       const setVals: Ast[] = []
       for (const elem of data.data) {
-        const elemAst = createAst(elem)
+        const elemAst = createAstInner(elem, varMap)
         setVals.push(elemAst)
       }
       return set(...setVals)
     case "setOp":
-      const sl: Ast = createAst(data.left)
-      const sr: Ast = createAst(data.right)
+      const sl: Ast = createAstInner(data.left, varMap)
+      const sr: Ast = createAstInner(data.right, varMap)
       switch (data.op) {
-        case "|":
+        case "∪":
           return union(sl, sr)
-        case "&":
+        case "∩":
           return intersect(sl, sr)
         case "\\":
           throw "not implemented"
@@ -452,8 +459,8 @@ function createAst(data: any) {
           throw "YIKES this shouldn't have happened " + data.type + " " + data.op
       }
     case "setElemOp":
-      const sel: Ast = createAst(data.left)
-      const ser: Ast = createAst(data.right)
+      const sel: Ast = createAstInner(data.left, varMap)
+      const ser: Ast = createAstInner(data.right, varMap)
       switch (data.op) {
         case "∈":
           return elemof(sel, ser)
@@ -465,18 +472,18 @@ function createAst(data: any) {
     case "setEmpty":
       throw "shouldn't happen, all setEmpty should be gone"
     case "pred":
-      return createAst(data.value)
+      return createAstInner(data.value, varMap)
     case "disjunct":
       const preds: Ast[] = []
       for (const elem of data.preds) {
-        const pred: Ast = createAst(elem)
+        const pred: Ast = createAstInner(elem, varMap)
         preds.push(pred)
       }
       return or(...preds)
     case "conjunct":
       const preds2: Ast[] = []
       for (const elem of data.preds) {
-        const pred2 = createAst(elem)
+        const pred2 = createAstInner(elem, varMap)
         preds2.push(pred2)
       }
       return and(...preds2)
@@ -485,53 +492,77 @@ function createAst(data: any) {
   }
 }
 
-export function parseMain(input: string) {
-  varMap = {}
+export function getVarsAndInferredTypes(input: string, varMap: Record<string, { type: Type }> = {}) {
   setEmptyVarsCt = 0
-  const parser = new Parser(Grammar.fromCompiled(grammar))
-  parser.feed(input.split(" ").join("").trim())
 
-  if (parser.results.length < 1) throw "bad parsing"
+  const parser = new Parser(Grammar.fromCompiled(grammar))
+  try {
+    parser.feed(input.split(" ").join("").trim())
+  } catch (e) {
+    throw "Error parsing" + e
+  }
+  // ensure parser ended up with something
+  if (parser.results.length < 1) throw "Parsing - No output/nothing to parse"
+
   const res = parser.results[0]
   const t1 = flattenConjuntDisjunct(res)
-  // writeFileSync("output.json", JSON.stringify(t1, null, 2))
-
   const t2 = createSetEmptyVars(t1)
-  // figure out the type/sorts of each var
-  for (let i = 0; i < 3; i++) {
-    typeinferVars(t2)
+
+  try {
+    // figure out the type/sorts of each var
+    for (let i = 0; i < 3; i++) {
+      typeinferVarsInner(t2, varMap)
+    }
+  } catch {
+    throw "Error inferring types"
   }
-  // if there are still unknowns, just assume every unknown variable is an int
-  // TODO maybe remove free variables
-  for (let vname in varMap) {
-    varMap[vname].type.replaceAll(Types.Unknown, Types.Int)
+  // since we just want vars, delete set empty vars
+  for (const vname in varMap) {
+    if (vname.indexOf("__SET_EMPTY_VAR_") === 0) {
+      delete varMap[vname]
+    }
+  }
+
+  return varMap
+}
+
+export function parseToAst(input: string, varMap: Record<string, { type: Type }> = {}) {
+  setEmptyVarsCt = 0
+
+  const parser = new Parser(Grammar.fromCompiled(grammar))
+  try {
+    parser.feed(input.split(" ").join("").trim())
+  } catch (e) {
+    throw "Error parsing" + e
+  }
+  // ensure parser ended up with something
+  if (parser.results.length < 1) throw "Parsing - No output/nothing to parse"
+
+  const res = parser.results[0]
+  const t1 = flattenConjuntDisjunct(res)
+  const t2 = createSetEmptyVars(t1)
+
+  try {
+    // figure out the type/sorts of each var
+    for (let i = 0; i < 3; i++) {
+      typeinferVarsInner(t2, varMap)
+    }
+  } catch (e) {
+    throw "Error inferring types - " + e
+  }
+
+  // if there are still unknowns, throw error
+  for (const vname in varMap) {
+    if (varMap[vname].type.indexOf(Types.Unknown) !== -1) {
+      throw "Formula contains variables with unknown types"
+    }
   }
 
   const parseTree = t2
-
-  const ast = createAst(parseTree)
-  // console.log(ast.fmt())
-  // console.log(ast.typecheck())
-  // console.log(JSON.stringify(flattenConjuntDisjunct(res), null, 2).replaceAll("\\\\", "\\"))
-  return ast
+  try {
+    const ast = createAstInner(parseTree, varMap)
+    return ast
+  } catch (e) {
+    throw "Error creating ast - " + e
+  }
 }
-
-// const input = "(x1 + 2 * 3) * 3 != 2"
-// const input = "(x > y) /\\ y == z"
-// const input = "!x /\\ (x1 == 3 \\/ x1 > 3 \\/ (x1 + 2 * 3) * 3 != 2) /\\ x1 != y2"
-// const input = "-3 + 2 > 1 /\\ 1 + 2 == 3"
-
-// const input = "x != y /\\ (x == {1, 2, 3} | {4, 5, 5} \\/ 3 + 2 > 1)"
-// const input = "x != y /\\ (x == {1, 2, 3} & {4, 5, 5} \\/ 3 + 2 > 1) /\\ a ∈ x /\\ x == ∅"
-// const input = "x != y /\\ (1 == 2 + -1 \\/ 3 + 2 > 1 \\/ a \\/ b) /\\ a ∈ x /\\ x == ∅"
-// const input = "(1 == 2 + -1 \\/ 3 + 2 > 1 \\/ a \\/ b) /\\ a ∈ x /\\ x == ∅ /\\ b ∈ x"
-// const input = "a == 1 /\\ a ∈ x /\\ x == ∅"
-// const input = "x == {1, 2, 3} | {4, 5, y} /\\ a != x"
-const input = "x == {a, b, c} /\\ c == 1"
-
-// const input = "a[x] == 1 /\\ x == 2"
-// const input = "a[1 -> x] == y /\\ x == 5 + 3"
-// const input = "a[1 + 2 -> x] == y /\\ x == 5 + 3"
-// const input = "a[1 -> x] == a[x -> 1]"
-console.log(parseMain(input).fmt())
-console.log(parseMain(input).typecheck())

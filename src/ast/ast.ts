@@ -1,4 +1,4 @@
-import { Sort } from "z3-solver"
+
 import { EQ, basicOp, TypeChecker } from "./typecheck"
 
 // Formatting methods for the AST
@@ -22,7 +22,7 @@ export type Op = {
 export type Ast = Op & { args?: Ast[] }
 
 // This Ast is also used to represent Sort. Since sometimes sort is an expression.
-export type SortAst = Ast & { args?: SortAst[]; constant: (this: SortAst, name: string) => Op }
+export type SortAst = Ast & { args?: Ast[]; constant: (this: SortAst, name: string) => Op }
 
 // This is the function to create an `Op`
 export function operator(name: string, value: any, tychk: TypeChecker, formatting: OpFormatting = { type: "function" }): Op {
@@ -108,7 +108,7 @@ export const SORT = {
 }
 
 // Create a sort that can create new sorts.
-export function sortfunc(name: string, args: SortAst[] = []): (...args: SortAst[]) => SortAst {
+export function sortfunc(name: string, args: SortAst[] = []): (...args: Ast[]) => SortAst {
   const op = operator(name, new SortId(name), basicOp(args, SORT))
   const sort: SortAst = {
     ...op,
@@ -116,7 +116,7 @@ export function sortfunc(name: string, args: SortAst[] = []): (...args: SortAst[
       return constant(this, name)
     },
   }
-  return (...args: SortAst[]) => {
+  return (...args: Ast[]) => {
     return { ...sort, args }
   }
 }
@@ -141,7 +141,12 @@ export function constant(sort: SortAst, name: string) {
   if (name.includes("$")) {
     const id = counter.get(name) || 0
     counter.set(name, id + 1)
-    name = name.replace("$", id.toString())
+    name = name.replace("$", toSubscript(id))
   }
   return new ConstId(name, sort).as_ast();
+}
+
+function toSubscript(num: number) {
+  const subscriptNumbers = "₀₁₂₃₄₅₆₇₈₉";
+  return num.toString().split('').map(digit => subscriptNumbers[parseInt(digit)]).join('');
 }

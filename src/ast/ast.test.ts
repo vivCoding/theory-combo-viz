@@ -1,11 +1,11 @@
-import { result } from "lodash"
 import { Ast, SORT } from "./ast"
 import { add, div, Int, intval, mul, sub } from "./theories/int"
-import { and, Bool, eq, implies, neq, not } from "./theories/logic"
+import { and, Bool, eq, implies, neq, not, or } from "./theories/logic"
 import { Set, diff, elemof, empty, intersect, set, single, subsetof, union } from "./theories/set"
 import { freeconstants_map, UNIFY } from "./typecheck"
 
 import { solve } from "./z3convert"
+import { BitVec, bvor, bvugt } from "./theories/bitvec"
 
 test("basic", () => {
   const a = Int.constant("a")
@@ -210,5 +210,15 @@ test.only("set+int example 4", async () => {
 
   // S | T & {5, 6} == {5}
   result = await solve(not(eq(intersect(union(S, T), set(intval(5), intval(6))), set(intval(5)))))
+  expect(result.status).toStrictEqual("unsat")
+})
+
+test("bitvec example 1", async () => {
+  const a = BitVec(intval(64)).constant("a")
+
+  // S | T == {4}
+  let result = await solve(not(
+    bvugt(bvor(a, intval(4)), a)
+  ))
   expect(result.status).toStrictEqual("unsat")
 })

@@ -4,6 +4,9 @@ import _, { constant } from "lodash"
 import * as int from "./theories/int"
 import * as logic from "./theories/logic"
 import * as set from "./theories/set"
+import * as array from "./theories/array"
+import * as bitvec from "./theories/bitvec"
+import { BitVecVal } from "./theories/bitvec"
 
 export type Z3Converter = {
   [key: string]: (ctx: Context, args: any[], ast: Ast) => any
@@ -29,7 +32,9 @@ export function convertToZ3Inner(ast: Ast, ctx: Context): any {
       throw new Error(`Z3 convertion error at ${ast.fmt()}: ${e}\n ${e.stack}`)
     }
   } else if (typeof ast.value == "number") {
-    return ctx.Int.sort().cast(ast.value)
+    return ctx.Int.sort().cast(ast.value);
+  } else if (ast.value instanceof BitVecVal) {
+    return ctx.BitVec.sort(ast.value.bv_size).cast(ast.value.val);
   } else {
     throw new Error(`Z3 convertion error at ${ast.fmt()}: unknown value ${ast.value}`)
   }
@@ -41,6 +46,8 @@ export function convertToZ3(ast: Ast, ctx: Context): z3.Ast | { sort: z3.Sort; c
       ...int.z3convert,
       ...logic.z3convert,
       ...set.z3convert,
+      ...array.z3convert,
+      ...bitvec.z3convert,
     }
   }
   const result = convertToZ3Inner(ast, ctx)

@@ -28,7 +28,7 @@ function purifyAstInner(theory: Theory, ast: Ast, result: Ast[]): Ast {
   } else {
     const ty = ast.typecheck();
     if(ty === SORT) { throw new Error(); }
-    const c = ty.constant('__p$') as Ast;
+    const c = ty.constant('p$') as Ast;
     result.push(eq(ast, c));
     return c;
   }

@@ -23,9 +23,17 @@ export function set2model2(result: SolverResult): CombinedSolverResult {
 
 export type CombinedSolverResult = { status: "sat"; model1?: Model; model2?: Model } | { status: "unsat" } | { status: "unknown" }
 
+export function init_purificaiton_result(result: (Ast | null)[]) {
+  var [base_fomula, formula1, formula2] = result;
+  return [
+    base_fomula && formula1? and(formula1, base_fomula) : formula1,
+    base_fomula && formula2? and(formula2, base_fomula) : formula2,
+  ]
+}
+
 export function combine(theory1: WitnessedTheory, theory2: Theory) {
   return async function (formula: Ast): Promise<CombinedSolverResult> {
-    var [_, formula1, formula2] = purification([baseTheory, theory1, theory2], formula)
+    var [formula1, formula2] = init_purificaiton_result(purification([baseTheory, theory1, theory2], formula))
     if (formula1 === null) {
       if (formula2 !== null) {
         return set2model2(await solve(formula2))

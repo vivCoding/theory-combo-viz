@@ -1,5 +1,5 @@
 import { ConstId } from "../ast/ast"
-import { setWitness } from "../witness/witness"
+import { arrayWitness, setWitness } from "../witness/witness"
 
 import type { Ast } from "../ast/ast"
 
@@ -27,7 +27,7 @@ export const intTheory: Theory = {
   name: "int",
   test_ast: (value: any) => {
     if (typeof value === "string") {
-      return ["int.add", "int.neg", "int.sub", "int.mul", "int.div", "int.gt", "int.lt", "int.ge", "int.le"].includes(value)
+      return value.startsWith("int");
     } else {
       return typeof value === "number"
     }
@@ -38,9 +38,32 @@ export const setTheory: WitnessedTheory = {
   name: "set",
   test_ast: (value: any) => {
     if (typeof value === "string") {
-      return ["set.union", "set.intersect", "set.single", "set.elemof", "set.diff", "set.empty", "set.subsetof"].includes(value)
+      return value.startsWith("set");
     }
     return false
   },
   witness: setWitness,
+}
+
+
+export const bvTheory: WitnessedTheory = {
+  name: "bv",
+  test_ast: (value: any) => {
+    if (typeof value === "string") {
+      return value.startsWith("bv");
+    }
+    return false
+  },
+  witness: setWitness,
+}
+
+export const arrayTheory: WitnessedTheory = {
+  name: "array",
+  test_ast: (value: any) => {
+    if (typeof value === "string") {
+      return value.startsWith("array");
+    }
+    return false
+  },
+  witness: arrayWitness,
 }

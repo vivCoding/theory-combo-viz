@@ -69,11 +69,19 @@ function findWordsNotStartingWithP(inputString: string) {
   return result
 }
 
+export function init_purificaiton_result(result: (Ast | null)[]) {
+  var [base_fomula, formula1, formula2] = result;
+  return [
+    base_fomula && formula1? and(formula1, base_fomula) : formula1,
+    base_fomula && formula2? and(formula2, base_fomula) : formula2,
+  ]
+}
+
 export function combine(theory1: WitnessedTheory, theory2: Theory) {
   return async function (formula: Ast): Promise<CombinedSolverResult> {
     const steps: SolverStep[] = []
     // eslint-disable-next-line prefer-const
-    let [_, formula1, formula2] = purification([baseTheory, theory1, theory2], formula)
+    var [formula1, formula2] = init_purificaiton_result(purification([baseTheory, theory1, theory2], formula))
     if (formula1 === null) {
       if (formula2 !== null) {
         return set2model2(await solve(formula2))

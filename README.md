@@ -1,4 +1,3 @@
-- z3 as backend
-- we build our own parser for each theory
-- we manually walk thru each step of the combination algo
--
+# Theory combination visualizer
+
+A visualizer for [polite theory combination](https://link.springer.com/chapter/10.1007/11559306_3).

@@ -8,11 +8,19 @@ const app = express()
 
 app.use(express.json())
 
+app.get("/", async (req: Request, res: Response) => {
+  console.log("got /")
+  res.status(StatusCodes.OK).json({
+    message: "ok",
+    data: "hello world!"
+  })
+})
+
 app.post("/api/hello", async (req: Request, res: Response) => {
   console.log("got /api/hello")
   res.status(StatusCodes.OK).json({
     message: "ok",
-    data: "hello world!"
+    data: "hello world api!"
   })
 })
 

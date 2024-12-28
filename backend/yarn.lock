@@ -2743,7 +2743,9 @@ yocto-queue@^0.1.0:
   resolved "https://registry.yarnpkg.com/yocto-queue/-/yocto-queue-0.1.0.tgz#0294eb3dee05028d31ee1a5fa2c556a6aaf10a1b"
   integrity sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==
 
-"z3-solver@file:./src/z3":
-  version "4.13.3"
+z3-solver@^4.13.4:
+  version "4.13.4"
+  resolved "https://registry.yarnpkg.com/z3-solver/-/z3-solver-4.13.4.tgz#47f21b3bd64acdb68280b1e83fd2a2217d4292e0"
+  integrity sha512-+P7/aubv/xVgFVm8Q1M6maBmiIdtLTB6S9pOITkRkBGPQW2aRx+U7GIOHTgTgF2uJpxbmzpWkXQVsz99zL+xRQ==
   dependencies:
     async-mutex "^0.3.2"

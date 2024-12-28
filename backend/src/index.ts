@@ -52,7 +52,7 @@ app.post("/api/combine", async (req: Request, res: Response) => {
   console.log("got /api/combine")
   const timeout = setTimeout(() => {
     res.status(StatusCodes.GATEWAY_TIMEOUT).send()
-  }, 20000);
+  }, 60000);
 
   try {
     const { payload } = req.body

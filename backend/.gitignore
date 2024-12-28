@@ -1,3 +1,4 @@
 node_modules
 .env
-dist
+# not good practice but meh
+# dist

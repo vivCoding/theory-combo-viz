@@ -89,6 +89,7 @@ export default function Home() {
               <li>Limited theories</li>
               <li>No nested data structures</li>
               <li>Very little fancy animations 😢</li>
+              <li>Not mobile responsive (due to laziness)</li>
             </ul>
           </div>
         </div>
